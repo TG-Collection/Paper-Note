@@ -40,10 +40,10 @@
         .note {
             position: absolute;
             padding: 15px;
-            min-width: 150px;
-            max-width: 300px;
+            min-width: 100px;
+            max-width: 200px;
             min-height: 80px;
-            max-height: 150px;
+            max-height: 180px;
             border-radius: 10px;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             cursor: move;
@@ -61,8 +61,8 @@
         }
         .note-content {
             word-wrap: break-word;
-            font-weight: 600;
-            font-size: 0.9em;
+            font-weight: 700;
+            font-size: 1.1em;
             color: #333;
             text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
             max-height: calc(100% - 30px);
@@ -187,18 +187,18 @@
             
             // Adjust width based on content length
             const contentLength = note.content.length;
-            const width = Math.min(300, Math.max(150, contentLength * 5)); // 5px per character, min 150px, max 300px
+            const width = Math.min(200, Math.max(100, contentLength * 4)); // 4px per character, min 100px, max 200px
             noteEl.style.width = `${width}px`;
             
             // Adjust height based on content
             setTimeout(() => {
                 const contentHeight = noteEl.querySelector('.note-content').scrollHeight;
-                const height = Math.min(150, Math.max(80, contentHeight + 40)); // +40px for padding and buttons
+                const height = Math.min(180, Math.max(80, contentHeight + 40)); // +40px for padding and buttons
                 noteEl.style.height = `${height}px`;
             }, 0);
             
             noteEl.style.left = `${Math.random() * (notesContainer.clientWidth - width)}px`;
-            noteEl.style.top = `${Math.random() * (notesContainer.clientHeight - 150)}px`;
+            noteEl.style.top = `${Math.random() * (notesContainer.clientHeight - 180)}px`;
             
             noteEl.addEventListener('mousedown', startDragging);
             noteEl.addEventListener('touchstart', startDragging);
