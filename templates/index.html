@@ -282,14 +282,6 @@
             setTimeout(() => noteEl.remove(), 300);
         }
 
-        async function updateLikes(noteId, action) {
-            await fetch(`/api/notes/${noteId}/${action}`, { method: 'POST' });
-            const btn = document.querySelector(`[data-id="${noteId}"].${action}-btn`);
-            btn.textContent = `${action === 'like' ? '👍' : '👎'} ${parseInt(btn.textContent.split(' ')[1]) + 1}`;
-            btn.classList.add('pulse');
-            setTimeout(() => btn.classList.remove('pulse'), 300);
-        }
-
         addNoteForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             await addNote(noteInput.value);
@@ -329,7 +321,7 @@
                 }
             }
         });
-        
+
         function startDragging(e) {
             e.preventDefault();
             const note = e.target.closest('.note');
