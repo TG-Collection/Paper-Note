@@ -40,9 +40,11 @@
         .note {
             position: absolute;
             padding: 15px;
-            width: 200px;
-            height: 200px;
-            border-radius: 15px;
+            min-width: 150px;
+            max-width: 300px;
+            min-height: 80px;
+            max-height: 150px;
+            border-radius: 10px;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             cursor: move;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
@@ -59,11 +61,11 @@
         }
         .note-content {
             word-wrap: break-word;
-            font-weight: 700;
-            font-size: 1.1em;
+            font-weight: 600;
+            font-size: 0.9em;
             color: #333;
             text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
-            max-height: 70%;
+            max-height: calc(100% - 30px);
             overflow-y: auto;
             margin-bottom: 10px;
         }
@@ -76,8 +78,8 @@
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 18px;
-            padding: 5px;
+            font-size: 14px;
+            padding: 3px;
             transition: transform 0.2s;
         }
         .like-btn:hover, .dislike-btn:hover, .delete-btn:hover {
@@ -134,9 +136,11 @@
                 height: 60vh;
             }
             .note {
-                width: 150px;
-                height: 150px;
-                font-size: 14px;
+                min-width: 120px;
+                max-width: 250px;
+                min-height: 60px;
+                max-height: 120px;
+                font-size: 12px;
             }
         }
     </style>
@@ -162,17 +166,16 @@
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
 
-        function getRandomGradient() {
-            const hue1 = Math.floor(Math.random() * 360);
-            const hue2 = (hue1 + 180) % 360; // Complementary color
-            return `linear-gradient(135deg, hsl(${hue1}, 80%, 80%) 0%, hsl(${hue2}, 80%, 80%) 100%)`;
+        function getRandomColor() {
+            const hue = Math.floor(Math.random() * 360);
+            return `hsl(${hue}, 70%, 80%)`;
         }
 
         function createNoteElement(note) {
             const noteEl = document.createElement('div');
             noteEl.className = 'note';
-            noteEl.style.background = getRandomGradient();
-            noteEl.style.setProperty('--rotate', `${Math.random() * 10 - 5}deg`);
+            noteEl.style.background = getRandomColor();
+            noteEl.style.setProperty('--rotate', `${Math.random() * 6 - 3}deg`);
             noteEl.innerHTML = `
                 <div class="note-content" contenteditable="true">${note.content}</div>
                 <div class="note-actions">
@@ -181,8 +184,21 @@
                     <button class="delete-btn" data-id="${note._id}">🗑️</button>
                 </div>
             `;
-            noteEl.style.left = `${Math.random() * (notesContainer.clientWidth - 200)}px`;
-            noteEl.style.top = `${Math.random() * (notesContainer.clientHeight - 200)}px`;
+            
+            // Adjust width based on content length
+            const contentLength = note.content.length;
+            const width = Math.min(300, Math.max(150, contentLength * 5)); // 5px per character, min 150px, max 300px
+            noteEl.style.width = `${width}px`;
+            
+            // Adjust height based on content
+            setTimeout(() => {
+                const contentHeight = noteEl.querySelector('.note-content').scrollHeight;
+                const height = Math.min(150, Math.max(80, contentHeight + 40)); // +40px for padding and buttons
+                noteEl.style.height = `${height}px`;
+            }, 0);
+            
+            noteEl.style.left = `${Math.random() * (notesContainer.clientWidth - width)}px`;
+            noteEl.style.top = `${Math.random() * (notesContainer.clientHeight - 150)}px`;
             
             noteEl.addEventListener('mousedown', startDragging);
             noteEl.addEventListener('touchstart', startDragging);
