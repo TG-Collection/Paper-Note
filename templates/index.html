@@ -65,7 +65,7 @@
             font-size: 1.1em;
             color: #333;
             text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
-            max-height: calc(100% - 30px);
+            max-height: calc(100% - 40px);
             overflow-y: auto;
             margin-bottom: 10px;
         }
@@ -94,17 +94,6 @@
         .like-count, .dislike-count {
             font-size: 12px;
             margin-left: 2px;
-        }
-        .like-btn, .dislike-btn, .delete-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            padding: 3px;
-            transition: transform 0.2s;
-        }
-        .like-btn:hover, .dislike-btn:hover, .delete-btn:hover {
-            transform: scale(1.2);
         }
         #add-note-form, #search-form {
             display: flex;
@@ -157,11 +146,15 @@
                 height: 60vh;
             }
             .note {
-                min-width: 120px;
-                max-width: 250px;
+                min-width: 80px;
+                max-width: 180px;
                 min-height: 60px;
-                max-height: 120px;
+                max-height: 160px;
                 font-size: 12px;
+            }
+            .action-btn svg {
+                width: 16px;
+                height: 16px;
             }
         }
     </style>
@@ -236,14 +229,7 @@
             
             return noteEl;
         }
-        async function updateLikes(noteId, action) {
-            await fetch(`/api/notes/${noteId}/${action}`, { method: 'POST' });
-            const btn = document.querySelector(`[data-id="${noteId}"].${action}-btn`);
-            const countSpan = btn.querySelector(`.${action}-count`);
-            countSpan.textContent = parseInt(countSpan.textContent) + 1;
-            btn.classList.add('pulse');
-            setTimeout(() => btn.classList.remove('pulse'), 300);
-        }
+
         async function fetchNotes(searchQuery = '') {
             const response = await fetch(`/api/notes?search=${encodeURIComponent(searchQuery)}`);
             const notes = await response.json();
@@ -282,6 +268,15 @@
             setTimeout(() => noteEl.remove(), 300);
         }
 
+        async function updateLikes(noteId, action) {
+            await fetch(`/api/notes/${noteId}/${action}`, { method: 'POST' });
+            const btn = document.querySelector(`[data-id="${noteId}"].${action}-btn`);
+            const countSpan = btn.querySelector(`.${action}-count`);
+            countSpan.textContent = parseInt(countSpan.textContent) + 1;
+            btn.classList.add('pulse');
+            setTimeout(() => btn.classList.remove('pulse'), 300);
+        }
+
         addNoteForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             await addNote(noteInput.value);
@@ -291,19 +286,6 @@
         searchForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             await fetchNotes(searchInput.value);
-        });
-
-        notesContainer.addEventListener('click', async (e) => {
-            const noteId = e.target.dataset.id;
-            if (e.target.classList.contains('like-btn')) {
-                await updateLikes(noteId, 'like');
-            } else if (e.target.classList.contains('dislike-btn')) {
-                await updateLikes(noteId, 'dislike');
-            } else if (e.target.classList.contains('delete-btn')) {
-                if (confirm('Are you sure you want to delete this note?')) {
-                    await deleteNote(noteId);
-                }
-            }
         });
 
         notesContainer.addEventListener('click', async (e) => {
@@ -319,6 +301,13 @@
                 if (confirm('Are you sure you want to delete this note?')) {
                     await deleteNote(noteId);
                 }
+            }
+        });
+
+        notesContainer.addEventListener('focusout', async (e) => {
+            if (e.target.classList.contains('note-content')) {
+                const noteId = e.target.nextElementSibling.querySelector('.like-btn').dataset.id;
+                await updateNote(noteId, e.target.textContent);
             }
         });
 
