@@ -266,14 +266,17 @@
         });
 
         notesContainer.addEventListener('click', async (e) => {
-            const noteId = e.target.dataset.id;
+            const noteId = e.target.closest('button').dataset.id;
             if (e.target.closest('.like-btn')) {
                 await updateLikes(noteId, 'like');
             } else if (e.target.closest('.dislike-btn')) {
                 await updateLikes(noteId, 'dislike');
             } else if (e.target.closest('.delete-btn')) {
-                if (confirm('Are you sure you want to delete this note?')) {
+                const password = prompt('Enter the password to delete this note:');
+                if (password === '1234') {
                     await deleteNote(noteId);
+                } else {
+                    alert('Incorrect password');
                 }
             }
         });
