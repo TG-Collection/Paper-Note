@@ -40,30 +40,40 @@
         .note {
             position: absolute;
             padding: 15px;
-            max-width: 200px;
+            width: 200px;
+            height: 200px;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             cursor: move;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
             transform: rotate(var(--rotate, 0deg));
             animation: float 6s ease-in-out infinite;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
         }
         .note:hover {
             transform: scale(1.05) rotate(var(--rotate, 0deg));
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2), 0 3px 6px rgba(0, 0, 0, 0.15);
         }
         .note-content {
-            margin-bottom: 10px;
             word-wrap: break-word;
             font-weight: 700;
             font-size: 1.1em;
             color: #333;
             text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
+            max-width: 100%;
+            max-height: 70%;
+            overflow-y: auto;
+            margin-bottom: 10px;
         }
         .note-actions {
             display: flex;
             justify-content: space-between;
+            width: 100%;
         }
-        .like-btn, .dislike-btn, .edit-btn, .delete-btn {
+        .like-btn, .dislike-btn, .delete-btn {
             background: none;
             border: none;
             cursor: pointer;
@@ -71,7 +81,7 @@
             padding: 5px;
             transition: transform 0.2s;
         }
-        .like-btn:hover, .dislike-btn:hover, .edit-btn:hover, .delete-btn:hover {
+        .like-btn:hover, .dislike-btn:hover, .delete-btn:hover {
             transform: scale(1.2);
         }
         #add-note-form, #search-form {
@@ -125,10 +135,12 @@
                 height: 60vh;
             }
             .note {
-                max-width: 150px;
+                width: 150px;
+                height: 150px;
                 font-size: 14px;
             }
         }
+        /* Shape-specific styles will be added dynamically in JavaScript */
     </style>
 </head>
 <body>
@@ -153,12 +165,26 @@
         const searchInput = document.getElementById('search-input');
 
         const shapes = [
-            'clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);', // Hexagon
-            'clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);', // Pentagon
-            'clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);', // Parallelogram
-            'clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);', // Diamond
-            'clip-path: circle(50% at 50% 50%);', // Circle
-            'border-radius: 15px;' // Rounded rectangle (default)
+            {
+                name: 'heart',
+                style: `clip-path: path('M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z');`
+            },
+            {
+                name: 'round',
+                style: 'border-radius: 50%;'
+            },
+            {
+                name: 'square',
+                style: 'border-radius: 0;'
+            },
+            {
+                name: 'boxy',
+                style: 'border-radius: 15px;'
+            },
+            {
+                name: 'pebble',
+                style: 'border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;'
+            }
         ];
 
         function getRandomGradient() {
@@ -170,8 +196,11 @@
         function createNoteElement(note) {
             const noteEl = document.createElement('div');
             noteEl.className = 'note';
-            noteEl.style.background = getRandomGradient();
-            noteEl.style.cssText += shapes[Math.floor(Math.random() * shapes.length)];
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            noteEl.style.cssText = `
+                ${shape.style}
+                background: ${getRandomGradient()};
+            `;
             noteEl.style.setProperty('--rotate', `${Math.random() * 10 - 5}deg`);
             noteEl.innerHTML = `
                 <div class="note-content" contenteditable="true">${note.content}</div>
@@ -182,7 +211,7 @@
                 </div>
             `;
             noteEl.style.left = `${Math.random() * (notesContainer.clientWidth - 200)}px`;
-            noteEl.style.top = `${Math.random() * (notesContainer.clientHeight - 100)}px`;
+            noteEl.style.top = `${Math.random() * (notesContainer.clientHeight - 200)}px`;
             
             noteEl.addEventListener('mousedown', startDragging);
             noteEl.addEventListener('touchstart', startDragging);
