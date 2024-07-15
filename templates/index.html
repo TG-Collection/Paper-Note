@@ -6,6 +6,7 @@
     <title>Floating Notes</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 
         body {
             font-family: 'Poppins', sans-serif;
@@ -81,6 +82,7 @@
             font-size: 14px;
             padding: 3px;
             transition: transform 0.2s;
+            color: #333;
         }
         .like-btn:hover, .dislike-btn:hover, .delete-btn:hover {
             transform: scale(1.2);
@@ -179,9 +181,9 @@
             noteEl.innerHTML = `
                 <div class="note-content" contenteditable="true">${note.content}</div>
                 <div class="note-actions">
-                    <button class="like-btn" data-id="${note._id}">👍 ${note.likes}</button>
-                    <button class="dislike-btn" data-id="${note._id}">👎 ${note.dislikes}</button>
-                    <button class="delete-btn" data-id="${note._id}">🗑️</button>
+                    <button class="like-btn" data-id="${note._id}"><i class="fas fa-thumbs-up"></i> ${note.likes}</button>
+                    <button class="dislike-btn" data-id="${note._id}"><i class="fas fa-thumbs-down"></i> ${note.dislikes}</button>
+                    <button class="delete-btn" data-id="${note._id}"><i class="fas fa-trash-alt"></i></button>
                 </div>
             `;
             
@@ -207,20 +209,18 @@
         }
 
         async function fetchNotes(searchQuery = '') {
-            const response = await fetch(`/api/notes?search=${encodeURIComponent(searchQuery)}`);
-            const notes = await response.json();
+
+
             notesContainer.innerHTML = '';
-            notes.forEach(note => {
-                notesContainer.appendChild(createNoteElement(note));
-            });
+            const response = await fetch(`/api/notes?search=${searchQuery}`);
+            const notes = await response.json();
+            notes.forEach(note => notesContainer.appendChild(createNoteElement(note)));
         }
 
         async function addNote(content) {
             const response = await fetch('/api/notes', {
                 method: 'POST',
-                headers:
-
- {
+                headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ content }),
@@ -249,7 +249,7 @@
         async function updateLikes(noteId, action) {
             await fetch(`/api/notes/${noteId}/${action}`, { method: 'POST' });
             const btn = document.querySelector(`[data-id="${noteId}"].${action}-btn`);
-            btn.textContent = `${action === 'like' ? '👍' : '👎'} ${parseInt(btn.textContent.split(' ')[1]) + 1}`;
+            btn.innerHTML = `<i class="fas fa-thumbs-${action === 'like' ? 'up' : 'down'}"></i> ${parseInt(btn.textContent.split(' ')[1]) + 1}`;
             btn.classList.add('pulse');
             setTimeout(() => btn.classList.remove('pulse'), 300);
         }
@@ -267,11 +267,11 @@
 
         notesContainer.addEventListener('click', async (e) => {
             const noteId = e.target.dataset.id;
-            if (e.target.classList.contains('like-btn')) {
+            if (e.target.closest('.like-btn')) {
                 await updateLikes(noteId, 'like');
-            } else if (e.target.classList.contains('dislike-btn')) {
+            } else if (e.target.closest('.dislike-btn')) {
                 await updateLikes(noteId, 'dislike');
-            } else if (e.target.classList.contains('delete-btn')) {
+            } else if (e.target.closest('.delete-btn')) {
                 if (confirm('Are you sure you want to delete this note?')) {
                     await deleteNote(noteId);
                 }
