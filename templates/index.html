@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notable Notes</title>
+    <title>Floating Notes</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
@@ -41,7 +41,7 @@
         .note {
             position: absolute;
             padding: 15px;
-            min-width: 100px;
+            min-width: 150px;
             max-width: 300px;
             min-height: 80px;
             max-height: 150px;
@@ -149,15 +149,15 @@
 </head>
 <body>
     <div class="container">
-        <h1>Memories</h1>
+        <h1>Floating Notes</h1>
         <form id="search-form">
-            <input type="text" id="search-input" placeholder="Search messages" required>
+            <input type="text" id="search-input" placeholder="Search notes" required>
             <button type="submit" id="search-btn">Search</button>
         </form>
         <div id="notes-container"></div>
         <form id="add-note-form">
-            <input type="text" id="note-input" placeholder="Enter your message" required>
-            <button type="submit" id="add-note-btn">Drop Message</button>
+            <input type="text" id="note-input" placeholder="Enter your note" required>
+            <button type="submit" id="add-note-btn">Add Note</button>
         </form>
     </div>
 
@@ -208,9 +208,9 @@
             return noteEl;
         }
 
-        async function fetchNotes(searchQuery = '') {
+        async function fetchNotes(searchQuery = '')
 
-
+ {
             notesContainer.innerHTML = '';
             const response = await fetch(`/api/notes?search=${searchQuery}`);
             const notes = await response.json();
@@ -266,6 +266,22 @@
         });
 
         notesContainer.addEventListener('click', async (e) => {
+            const noteId = e.target.closest('button').dataset.id;
+            if (e.target.closest('.like-btn')) {
+                await updateLikes(noteId, 'like');
+            } else if (e.target.closest('.dislike-btn')) {
+                await updateLikes(noteId, 'dislike');
+            } else if (e.target.closest('.delete-btn')) {
+                const password = prompt('Enter the password to delete this note:');
+                if (password === '1234') {
+                    await deleteNote(noteId);
+                } else {
+                    alert('Incorrect password');
+                }
+            }
+        });
+
+        notesContainer.addEventListener('touchend', async (e) => {
             const noteId = e.target.closest('button').dataset.id;
             if (e.target.closest('.like-btn')) {
                 await updateLikes(noteId, 'like');
