@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floating Notes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+        }
+        #notes-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .note {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 200px;
+            transition: transform 0.3s ease;
+        }
+        .note:hover {
+            transform: scale(1.05);
+        }
+        .note-content {
+            margin-bottom: 10px;
+        }
+        .note-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+        .like-btn, .dislike-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        #add-note-form {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        #note-input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        #add-note-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div id="notes-container"></div>
+    <form id="add-note-form">
+        <input type="text" id="note-input" placeholder="Enter your note" required>
+        <button type="submit" id="add-note-btn">Add Note</button>
+    </form>
+
+    <script>
+        const notesContainer = document.getElementById('notes-container');
+        const addNoteForm = document.getElementById('add-note-form');
+        const noteInput = document.getElementById('note-input');
+
+        function createNoteElement(note) {
+            const noteEl = document.createElement('div');
+            noteEl.className = 'note';
+            noteEl.innerHTML = `
+                <div class="note-content">${note.content}</div>
+                <div class="note-actions">
+                    <button class="like-btn" data-id="${note._id}">👍 ${note.likes}</button>
+                    <button class="dislike-btn" data-id="${note._id}">👎 ${note.dislikes}</button>
+                </div>
+            `;
+            noteEl.style.left = `${Math.random() * (window.innerWidth - 200)}px`;
+            noteEl.style.top = `${Math.random() * (window.innerHeight - 100)}px`;
+            return noteEl;
+        }
+
+        async function fetchNotes() {
+            const response = await fetch('/api/notes');
+            const notes = await response.json();
+            notes.forEach(note => {
+                notesContainer.appendChild(createNoteElement(note));
+            });
+        }
+
+        async function addNote(content) {
+            const response = await fetch('/api/notes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ content }),
+            });
+            const note = await response.json();
+            notesContainer.appendChild(createNoteElement(note));
+        }
+
+        async function updateLikes(noteId, action) {
+            await fetch(`/api/notes/${noteId}/${action}`, { method: 'POST' });
+            const btn = document.querySelector(`[data-id="${noteId}"].${action}-btn`);
+            btn.textContent = `${action === 'like' ? '👍' : '👎'} ${parseInt(btn.textContent.split(' ')[1]) + 1}`;
+        }
+
+        addNoteForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await addNote(noteInput.value);
+            noteInput.value = '';
+        });
+
+        notesContainer.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('like-btn')) {
+                await updateLikes(e.target.dataset.id, 'like');
+            } else if (e.target.classList.contains('dislike-btn')) {
+                await updateLikes(e.target.dataset.id, 'dislike');
+            }
+        });
+
+        function animateNotes() {
+            const notes = document.querySelectorAll('.note');
+            notes.forEach(note => {
+                const x = parseFloat(note.style.left);
+                const y = parseFloat(note.style.top);
+                const newX = x + (Math.random() - 0.5) * 2;
+                const newY = y + (Math.random() - 0.5) * 2;
+                note.style.left = `${Math.max(0, Math.min(newX, window.innerWidth - 200))}px`;
+                note.style.top = `${Math.max(0, Math.min(newY, window.innerHeight - 100))}px`;
+            });
+            requestAnimationFrame(animateNotes);
+        }
+
+        fetchNotes().then(() => {
+            animateNotes();
+        });
+    </script>
+</body>
+</html>
