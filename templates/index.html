@@ -218,7 +218,9 @@
         async function addNote(content) {
             const response = await fetch('/api/notes', {
                 method: 'POST',
-                headers: {
+                headers:
+
+ {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ content }),
