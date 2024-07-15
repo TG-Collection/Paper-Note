@@ -289,7 +289,7 @@
                 await updateLikes(noteId, 'dislike');
             } else if (e.target.closest('.delete-btn')) {
                 const password = prompt('Enter the password to delete this note:');
-                if (password === '143') {
+                if (password === '1234') {
                     await deleteNote(noteId);
                 } else {
                     alert('Incorrect password');
