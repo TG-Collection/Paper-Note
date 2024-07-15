@@ -42,4 +42,4 @@ async def dislike_note(note_id):
     return '', 204
 
 if __name__ == '__main__':
-    app.run(debug=True, port=os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 10000)), debug=True)
