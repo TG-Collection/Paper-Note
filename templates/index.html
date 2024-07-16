@@ -39,9 +39,9 @@
             background: rgba(255, 253, 240, 0.7);
             border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 0 20px rgba(0, 0, 0, 0.08) inset;
-            padding: 40px;
             position: relative;
             overflow: hidden;
+            padding: 40px 40px 70px 40px;
         }
 
         .container::before {
@@ -262,6 +262,27 @@
         #logout-btn:hover {
             background: #8c6142;
         }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 0.9em;
+            color: #666;
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+        }
+
+        footer a {
+            color: #a67c52;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: #8c6142;
+        }
     </style>
 </head>
 <body>
@@ -286,6 +307,10 @@
                 </div>
                 <button type="submit" id="add-note-btn">Pin</button>
             </form>
+            <!-- ... footer ... -->
+        <footer>
+            <p>© 2024 | Made with ❤️ by <a href="https://t.me/meerazi" target="_blank">RAZi</a></p>
+        </footer>
         </div>
     </div>
 
