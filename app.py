@@ -8,7 +8,7 @@ app = Quart(__name__)
 # MongoDB connection
 client = AsyncIOMotorClient(os.environ.get("MONGODB_URL"))
 db = client.floating_notes
-notes_collection = db[os.environ.get('COLLECTION_NAME', 'notes')]
+notes_collection = db[os.environ.get('NOTES_COLLECTION_NAME', 'notes')]
 
 @app.route('/')
 async def index():
