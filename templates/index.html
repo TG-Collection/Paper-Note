@@ -3,111 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kraft Paper Memories</title>
+    <title>Vintage Kraft Paper Memories</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400;600&display=swap');
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background: #f0f0f0;
+            font-family: 'Source Sans Pro', sans-serif;
             margin: 0;
+            padding: 0;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            color: #333;
+            background: #d2b48c;
+            color: #3a3a3a;
         }
-        .container { width: 100%; max-width: 1200px; padding: 20px; text-align: center; }
-        #notes-container {
+
+        .vintage-background {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 70vh;
-            overflow: hidden;
-            margin-bottom: 20px;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feBlend mode="multiply" in="SourceGraphic" result="monoNoise"/><feColorMatrix in="monoNoise" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.5 0"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.1"/></svg>'), radial-gradient(circle, #d2b48c, #a67c52);
+            background-size: cover;
+            filter: url('#paper-texture');
+            z-index: -1;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            background: rgba(255, 253, 240, 0.7);
             border-radius: 15px;
-            background: #fff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 0 20px rgba(0, 0, 0, 0.08) inset;
+            padding: 40px;
             position: relative;
+            overflow: hidden;
         }
-        .note {
-            position: absolute;
-            padding: 15px;
-            width: 200px;
-            height: 100px;
-            background: #d2b48c; /* Kraft paper color */
-            border-radius: 0 0 10px 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            cursor: move;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .note::before {
+
+        .container::before {
             content: '';
             position: absolute;
-            top: -10px;
+            top: 0;
             left: 0;
             right: 0;
-            height: 20px;
-            background: #d2b48c;
-            border-radius: 10px 10px 0 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="paper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter><rect width="100" height="100" filter="url(%23paper)" opacity="0.1"/></svg>');
+            z-index: -1;
         }
-        .note::after {
-            content: '';
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            color: #3a3a3a;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        #notes-container {
+            width: 100%;
+            height: 60vh;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .note {
+            background: #f4e6c9;
+            border: 1px solid #d3bc8d;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 5px rgba(0, 0, 0, 0.05) inset;
+            border-radius: 5px;
+            padding: 15px;
+            width: 180px;
             position: absolute;
-            top: 5px;
-            left: 15px;
-            width: 10px;
-            height: 10px;
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 0 2px #a9845c;
+            cursor: move;
+            transition: all 0.3s ease;
         }
+
         .note:hover {
             transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 5px rgba(0, 0, 0, 0.05) inset;
         }
+
         .note-content {
-            word-wrap: break-word;
-            font-weight: 600;
+            font-family: 'Source Sans Pro', sans-serif;
             font-size: 0.9em;
-            color: #333;
+            color: #3a3a3a;
+            word-wrap: break-word;
             max-height: calc(100% - 30px);
             overflow-y: auto;
-            margin-bottom: 10px;
         }
-        .note-actions { display: flex; justify-content: space-between; }
+
+        .note-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
         .like-btn, .dislike-btn, .delete-btn {
             background: none;
             border: none;
             cursor: pointer;
             font-size: 14px;
-            padding: 3px;
-            transition: transform 0.2s;
-            color: #333;
+            color: #5a5a5a;
+            transition: color 0.2s, transform 0.2s;
         }
-        .like-btn:hover, .dislike-btn:hover, .delete-btn:hover { transform: scale(1.2); }
+
+        .like-btn:hover, .dislike-btn:hover, .delete-btn:hover {
+            color: #3a3a3a;
+            transform: scale(1.1);
+        }
+
         #add-note-form, #search-form {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-            width: 100%;
-            max-width: 600px;
         }
+
         #note-input, #search-input {
             flex-grow: 1;
-            padding: 12px;
-            border: 1px solid #d2b48c;
+            padding: 10px 15px;
+            border: 1px solid #d3bc8d;
             border-radius: 25px;
             font-size: 16px;
-            background: #fff;
-            color: #333;
+            background: rgba(255, 253, 240, 0.8);
+            color: #3a3a3a;
         }
+
         #add-note-btn, #search-btn {
-            padding: 12px 24px;
-            background: #d2b48c;
-            color: #333;
+            padding: 10px 20px;
+            background: #a67c52;
+            color: #fff;
             border: none;
             border-radius: 25px;
             cursor: pointer;
@@ -115,14 +144,16 @@
             font-weight: 600;
             transition: background 0.3s;
         }
+
         #add-note-btn:hover, #search-btn:hover {
-            background: #a9845c;
+            background: #8c6142;
         }
     </style>
 </head>
 <body>
+    <div class="vintage-background"></div>
     <div class="container">
-        <h1>Kraft Paper Memories</h1>
+        <h1>Vintage Kraft Paper Memories</h1>
         <form id="search-form">
             <input type="text" id="search-input" placeholder="Search messages" required>
             <button type="submit" id="search-btn">Search</button>
@@ -133,6 +164,13 @@
             <button type="submit" id="add-note-btn">Drop</button>
         </form>
     </div>
+
+    <svg width="0" height="0">
+        <filter id="paper-texture">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5"/>
+            <feDisplacementMap in="SourceGraphic" scale="5"/>
+        </filter>
+    </svg>
 
     <script>
         const notesContainer = document.getElementById('notes-container');
