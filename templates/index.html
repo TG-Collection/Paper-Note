@@ -190,6 +190,8 @@
             font-size: 16px;
             background: rgba(255, 253, 240, 0.8);
             color: #3a3a3a;
+            height: 42px; 
+            box-sizing: border-box;
         }
 
         #char-count {
@@ -209,7 +211,10 @@
             font-weight: 600;
             transition: background 0.3s;
             margin-left: 10px;
-            height: 42px;
+            height: 42px;  /* Match the height of the input field */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #add-note-btn:hover, #search-btn:hover {
