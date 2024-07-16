@@ -2,7 +2,6 @@ from quart import Quart, request, jsonify, render_template
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 import os
-import random
 
 app = Quart(__name__)
 
