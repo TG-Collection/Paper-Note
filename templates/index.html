@@ -42,8 +42,7 @@
             cursor: move;
             background: hsl(var(--hue, 0), 70%, 80%);
             transform: rotate(var(--rotate)) translateY(var(--translateY, 0));
-            transition: transform 0.3s;
-            animation: float 6s ease-in-out infinite;
+            transition: all 0.3s ease;
         }
         .note:hover { transform: scale(1.05) rotate(var(--rotate)); }
         .note-content {
@@ -92,10 +91,6 @@
             font-size: 16px;
             font-weight: 600;
         }
-        @keyframes float {
-            0%, 100% { --translateY: 0px; }
-            50% { --translateY: -20px; }
-        }
     </style>
 </head>
 <body>
@@ -133,8 +128,10 @@
                 </div>
             `;
             
-            noteEl.style.left = `${Math.random() * (notesContainer.clientWidth - 300)}px`;
-            noteEl.style.top = `${Math.random() * (notesContainer.clientHeight - 150)}px`;
+            const left = Math.random() * (notesContainer.clientWidth - 300);
+            const top = Math.random() * (notesContainer.clientHeight - 150);
+            noteEl.style.left = `${left}px`;
+            noteEl.style.top = `${top}px`;
             
             noteEl.addEventListener('mousedown', startDragging);
             noteEl.addEventListener('touchstart', startDragging);
@@ -161,7 +158,9 @@
 
         async function deleteNote(noteId) {
             await fetch(`/api/notes/${noteId}`, { method: 'DELETE' });
-            document.querySelector(`.note .delete-btn[data-id="${noteId}"]`).closest('.note').remove();
+            const noteEl = document.querySelector(`.note .delete-btn[data-id="${noteId}"]`).closest('.note');
+            noteEl.style.opacity = '0';
+            setTimeout(() => noteEl.remove(), 300);
         }
 
         async function updateLikes(noteId, action) {
@@ -206,8 +205,11 @@
             function drag(e) {
                 const x = e.clientX || e.touches[0].clientX;
                 const y = e.clientY || e.touches[0].clientY;
-                note.style.left = `${Math.max(0, Math.min(startLeft + x - startX, notesContainer.clientWidth - note.offsetWidth))}px`;
-                note.style.top = `${Math.max(0, Math.min(startTop + y - startY, notesContainer.clientHeight - note.offsetHeight))}px`;
+                const newLeft = Math.max(0, Math.min(startLeft + x - startX, notesContainer.clientWidth - note.offsetWidth));
+                const newTop = Math.max(0, Math.min(startTop + y - startY, notesContainer.clientHeight - note.offsetHeight));
+                
+                note.style.left = `${newLeft}px`;
+                note.style.top = `${newTop}px`;
             }
 
             function stopDragging() {
@@ -223,7 +225,18 @@
             document.addEventListener('touchend', stopDragging);
         }
 
-        fetchNotes();
+        function animateNotes() {
+            const notes = document.querySelectorAll('.note');
+            notes.forEach(note => {
+                const newTranslateY = Math.sin(Date.now() / 1000) * 10;
+                note.style.transform = `rotate(var(--rotate)) translateY(${newTranslateY}px)`;
+            });
+            requestAnimationFrame(animateNotes);
+        }
+
+        fetchNotes().then(() => {
+            animateNotes();
+        });
     </script>
 </body>
 </html>
