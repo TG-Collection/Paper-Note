@@ -54,27 +54,16 @@
             background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="paper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter><rect width="100" height="100" filter="url(%23paper)" opacity="0.1"/></svg>');
             z-index: -1;
         }
-        .title-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-
-        .title-image {
-            width: 80px;  /* Adjust this value as needed */
-            height: auto;
-            margin-right: 20px;  /* Space between image and text */
-        }
 
         h1 {
             font-family: 'Playfair Display', serif;
             font-size: 2.5em;
             color: #3a3a3a;
+            text-align: center;
+            margin-bottom: 30px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-            margin: 0;  /* Remove default margin */
         }
-        
+
         #notes-container {
             width: 100%;
             height: 60vh;
@@ -192,21 +181,12 @@
             background: #8c6142;
         }
 
-        .title-image {
-            display: block;
-            margin: 0 auto 20px;
-            max-width: 50px;
-            height: auto;
-        }
     </style>
 </head>
 <body>
     <div class="vintage-background"></div>
     <div class="container">
-        <div class="title-container">
-            <img src="/static/icon/title.png" alt="Vintage Kraft Paper Memories" class="title-image">
-            <h1>Paper Memories</h1>
-        </div>
+        <h1>Paper Memories</h1>
         <form id="search-form">
             <input type="text" id="search-input" placeholder="Search messages" required>
             <button type="submit" id="search-btn">Search</button>
