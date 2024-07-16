@@ -116,41 +116,33 @@
         .note {
             background: #f4e6c9;
             border: 1px solid #d3bc8d;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1), 0 0 5px rgba(0, 0, 0, 0.05) inset;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            margin-bottom: 20px;
             border-radius: 5px;
-            padding: 15px;
-            width: 180px;
+            position: relative;
+        }
+
+        .note::before, .note::after {
+            content: '';
             position: absolute;
-            cursor: move;
-            transition: all 0.3s ease;
-            overflow: hidden;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #d3bc8d;
+            z-index: 1;
         }
 
         .note::before {
-            content: '';
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 15px;
-            height: 15px;
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 
-                inset 0 0 5px rgba(0,0,0,0.2),
-                0 0 0 3px #f4e6c9,
-                0 0 0 5px #d3bc8d,
-                2px 2px 5px rgba(0,0,0,0.1);
-        } 
+            top: -5px;
+            left: -5px;
+            box-shadow: 0 0 0 2px #f4e6c9, 0 0 0 4px #d3bc8d;
+        }
 
         .note::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 50%);
-            pointer-events: none;
+            top: -5px;
+            right: -5px;
+            box-shadow: 0 0 0 2px #f4e6c9, 0 0 0 4px #d3bc8d;
         }
 
         .note:hover {
