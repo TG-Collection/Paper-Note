@@ -116,11 +116,14 @@
         .note {
             background: #f4e6c9;
             border: 1px solid #d3bc8d;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-            padding: 10px;
-            margin-bottom: 20px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1), 0 0 5px rgba(0, 0, 0, 0.05) inset;
             border-radius: 5px;
-            position: relative;
+            padding: 15px;
+            width: 180px;
+            position: absolute;
+            cursor: move;
+            transition: all 0.3s ease;
+            overflow: hidden;
         }
 
         .note::before, .note::after {
