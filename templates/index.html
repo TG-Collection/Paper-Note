@@ -102,9 +102,6 @@
             font-size: 16px;
             color: #666;
         }
-        .pin-btn.pinned {
-            color: #ff4d4d;
-        }
         #char-count {
             font-size: 0.8em;
             color: #666;
@@ -165,12 +162,12 @@
 
         .note-actions {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             margin-top: 10px;
             padding-right: 5px;
         }
 
-        .like-btn, .dislike-btn, .delete-btn {
+        .like-btn, .dislike-btn, .delete-btn, .pin-btn {
             background: none;
             border: none;
             cursor: pointer;
@@ -179,9 +176,13 @@
             transition: color 0.2s, transform 0.2s;
         }
 
-        .like-btn:hover, .dislike-btn:hover, .delete-btn:hover {
+        .like-btn:hover, .dislike-btn:hover, .delete-btn:hover, .pin-btn:hover {
             color: #3a3a3a;
             transform: scale(1.1);
+        }
+
+        .pin-btn.pinned {
+            color: #ff4d4d;
         }
 
         #add-note-form, #search-form {
@@ -376,17 +377,18 @@
             noteEl.style.setProperty('--hue', Math.floor(Math.random() * 360));
             noteEl.style.setProperty('--rotate', `${Math.random() * 6 - 3}deg`);
             noteEl.innerHTML = `
-                <button class="pin-btn ${note.pinned ? 'pinned' : ''}" data-id="${note._id}">
-                    <i class="fas fa-thumbtack"></i>
-                </button>
                 <div class="note-timestamp">${note.timestamp}</div>
                 <div class="note-content">${note.content}</div>
                 <div class="note-actions">
                     <button class="like-btn" data-id="${note._id}"><i class="fas fa-thumbs-up"></i> ${note.likes}</button>
                     <button class="dislike-btn" data-id="${note._id}"><i class="fas fa-thumbs-down"></i> ${note.dislikes}</button>
                     <button class="delete-btn" data-id="${note._id}"><i class="fas fa-trash-alt"></i></button>
+                    <button class="pin-btn ${note.pinned ? 'pinned' : ''}" data-id="${note._id}">
+                        <i class="fas fa-thumbtack"></i>
+                    </button>
                 </div>
             `;
+
 
             const left = Math.random() * (notesContainer.clientWidth - 300);
             const top = Math.random() * (notesContainer.clientHeight - 150);
@@ -405,6 +407,29 @@
             if (response.ok) {
                 const notes = await response.json();
                 notes.forEach(note => notesContainer.appendChild(createNoteElement(note)));
+            } else {
+                showLoginForm();
+            }
+        }
+
+        async function fetchNotes(searchQuery = '') {
+            notesContainer.innerHTML = '';
+            const response = await fetch(`/api/notes?search=${searchQuery}`);
+            if (response.ok) {
+                const notes = await response.json();
+        
+                // Sort notes: pinned notes first (to be added last, so they appear at the back)
+                notes.sort((a, b) => b.pinned - a.pinned);
+        
+                notes.forEach(note => {
+                    const noteEl = createNoteElement(note);
+                    if (note.pinned) {
+                        noteEl.style.zIndex = '1';
+                    } else {
+                        noteEl.style.zIndex = '2';
+                    }
+                    notesContainer.appendChild(noteEl);
+                });
             } else {
                 showLoginForm();
             }
