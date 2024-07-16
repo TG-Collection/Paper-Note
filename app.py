@@ -3,6 +3,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+import pytz
 
 app = Quart(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "your_secret_key")  # Make sure to set this in production
@@ -55,6 +57,24 @@ async def logout():
 async def status_handler():
     return jsonify({"status": "ok"})
 
+@app.route('/api/notes', methods=['POST'])
+async def add_note():
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    data = await request.json
+    kolkata_tz = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now(kolkata_tz)
+    note = {
+        'content': data['content'],
+        'likes': 0,
+        'dislikes': 0,
+        'username': session['username'],
+        'timestamp': current_time.strftime('%Y-%m-%d %H:%M:%S %Z')
+    }
+    result = await notes_collection.insert_one(note)
+    note['_id'] = str(result.inserted_id)
+    return jsonify(note), 201
+
 @app.route('/api/notes', methods=['GET'])
 async def get_notes():
     if 'username' not in session:
@@ -66,21 +86,6 @@ async def get_notes():
     } if search_query else {"username": session['username']}
     notes = await notes_collection.find(query).to_list(length=None)
     return jsonify([{**note, '_id': str(note['_id'])} for note in notes])
-
-@app.route('/api/notes', methods=['POST'])
-async def add_note():
-    if 'username' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    data = await request.json
-    note = {
-        'content': data['content'],
-        'likes': 0,
-        'dislikes': 0,
-        'username': session['username']
-    }
-    result = await notes_collection.insert_one(note)
-    note['_id'] = str(result.inserted_id)
-    return jsonify(note), 201
 
 @app.route('/api/notes/<note_id>', methods=['PUT'])
 async def update_note(note_id):

@@ -78,6 +78,13 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
+        .note-timestamp {
+            font-size: 0.8em;
+            color: #666;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
         #notes-container {
             width: 100%;
             height: 60vh;
@@ -356,6 +363,7 @@
             noteEl.style.setProperty('--rotate', `${Math.random() * 6 - 3}deg`);
             noteEl.innerHTML = `
                 <div class="note-content">${note.content}</div>
+                <div class="note-timestamp">${note.timestamp}</div>
                 <div class="note-actions">
                     <button class="like-btn" data-id="${note._id}"><i class="fas fa-thumbs-up"></i> ${note.likes}</button>
                     <button class="dislike-btn" data-id="${note._id}"><i class="fas fa-thumbs-down"></i> ${note.dislikes}</button>
