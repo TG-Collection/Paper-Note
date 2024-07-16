@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notable Notes</title>
+    <title>Kraft Paper Memories</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f0f0f0;
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            color: #ffffff;
+            color: #333;
         }
         .container { width: 100%; max-width: 1200px; padding: 20px; text-align: center; }
         #notes-container {
@@ -25,26 +25,49 @@
             overflow: hidden;
             margin-bottom: 20px;
             border-radius: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             position: relative;
         }
         .note {
             position: absolute;
             padding: 15px;
-            min-width: 150px;
-            max-width: 300px;
-            min-height: 80px;
-            max-height: 150px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            height: 100px;
+            background: #d2b48c; /* Kraft paper color */
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             cursor: move;
-            background: hsl(var(--hue, 0), 70%, 80%);
-            transform: rotate(var(--rotate)) translateY(var(--translateY, 0));
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-        .note:hover { transform: scale(1.05) rotate(var(--rotate)); }
+        .note::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: #d2b48c;
+            border-radius: 10px 10px 0 0;
+        }
+        .note::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 15px;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px #a9845c;
+        }
+        .note:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
         .note-content {
             word-wrap: break-word;
             font-weight: 600;
@@ -75,27 +98,31 @@
         #note-input, #search-input {
             flex-grow: 1;
             padding: 12px;
-            border: none;
+            border: 1px solid #d2b48c;
             border-radius: 25px;
             font-size: 16px;
-            background: rgba(255, 255, 255, 0.2);
-            color: #ffffff;
+            background: #fff;
+            color: #333;
         }
         #add-note-btn, #search-btn {
             padding: 12px 24px;
-            background: linear-gradient(45deg, #FF6B6B, #FFD93D);
-            color: white;
+            background: #d2b48c;
+            color: #333;
             border: none;
             border-radius: 25px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
+            transition: background 0.3s;
+        }
+        #add-note-btn:hover, #search-btn:hover {
+            background: #a9845c;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Memories</h1>
+        <h1>Kraft Paper Memories</h1>
         <form id="search-form">
             <input type="text" id="search-input" placeholder="Search messages" required>
             <button type="submit" id="search-btn">Search</button>
