@@ -289,177 +289,164 @@
             "retina_detect": true
         });
 
-        const notesContainer = document.getElementById('notes-container');
-        const addNoteForm = document.getElementById('add-note-form');
-        const noteInput = document.getElementById('note-input');
-        const searchForm = document.getElementById('search-form');
-        const searchInput = document.getElementById('search-input');
+        document.addEventListener('DOMContentLoaded', function() {
+            const notesContainer = document.getElementById('notes-container');
+            const addNoteForm = document.getElementById('add-note-form');
+            const noteInput = document.getElementById('note-input');
+            const searchForm = document.getElementById('search-form');
+            const searchInput = document.getElementById('search-input');
+            const apiUrl = '/api/notes';
 
-        function getRandomColor() {
-            const hue = Math.floor(Math.random() * 360);
-            return `hsl(${hue}, 70%, 80%)`;
-        }
+            function createNoteElement(note) {
+                const noteEl = document.createElement('div');
+                noteEl.className = 'note';
+                noteEl.dataset.id = note.id;
+                noteEl.style.backgroundColor = note.color;
+                noteEl.style.top = note.top;
+                noteEl.style.left = note.left;
+                noteEl.style.transform = `rotate(${note.rotation})`;
+                noteEl.innerHTML = `
+                    <div class="note-content">${note.content}</div>
+                    <div class="note-actions">
+                        <button class="like-btn"><i class="fas fa-thumbs-up"></i></button>
+                        <button class="dislike-btn"><i class="fas fa-thumbs-down"></i></button>
+                        <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                `;
 
-        function createNoteElement(note) {
-            const noteEl = document.createElement('div');
-            noteEl.className = 'note';
-            noteEl.style.background = getRandomColor();
-            noteEl.style.setProperty('--rotate', `${Math.random() * 6 - 3}deg`);
-            noteEl.innerHTML = `
-                <div class="note-content" contenteditable="true">${note.content}</div>
-                <div class="note-actions">
-                    <button class="like-btn" data-id="${note._id}"><i class="fas fa-thumbs-up"></i> ${note.likes}</button>
-                    <button class="dislike-btn" data-id="${note._id}"><i class="fas fa-thumbs-down"></i> ${note.dislikes}</button>
-                    <button class="delete-btn" data-id="${note._id}"><i class="fas fa-trash-alt"></i></button>
-                </div>
-            `;
-            
-            // Adjust width based on content length
-            const contentLength = note.content.length;
-            const width = Math.min(300, Math.max(150, contentLength * 5)); // 5px per character, min 150px, max 300px
-            noteEl.style.width = `${width}px`;
-            
-            // Adjust height based on content
-            setTimeout(() => {
-                const contentHeight = noteEl.querySelector('.note-content').scrollHeight;
-                const height = Math.min(150, Math.max(80, contentHeight + 40)); // +40px for padding and buttons
-                noteEl.style.height = `${height}px`;
-            }, 0);
-            
-            noteEl.style.left = `${Math.random() * (notesContainer.clientWidth - width)}px`;
-            noteEl.style.top = `${Math.random() * (notesContainer.clientHeight - 150)}px`;
-            
-            noteEl.addEventListener('mousedown', startDragging);
-            noteEl.addEventListener('touchstart', startDragging);
-            
-            return noteEl;
-        }
+                let isDragging = false;
+                let offsetX, offsetY;
 
-        async function fetchNotes(searchQuery = '') {
-            notesContainer.innerHTML = '';
-            const response = await fetch(`/api/notes?search=${searchQuery}`);
-            const notes = await response.json();
-            notes.forEach(note => notesContainer.appendChild(createNoteElement(note)));
-        }
+                noteEl.addEventListener('mousedown', startDrag);
+                noteEl.addEventListener('touchstart', startDrag);
 
-        async function addNote(content) {
-            const response = await fetch('/api/notes', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ content }),
-            });
-            const note = await response.json();
-            notesContainer.appendChild(createNoteElement(note));
-        }
-
-        async function updateNote(noteId, content) {
-            await fetch(`/api/notes/${noteId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ content }),
-            });
-        }
-
-        async function deleteNote(noteId) {
-            await fetch(`/api/notes/${noteId}`, { method: 'DELETE' });
-            const noteEl = document.querySelector(`.note .delete-btn[data-id="${noteId}"]`).closest('.note');
-            noteEl.classList.add('fade-out');
-            setTimeout(() => noteEl.remove(), 300);
-        }
-
-        async function updateLikes(noteId, action) {
-            await fetch(`/api/notes/${noteId}/${action}`, { method: 'POST' });
-            const btn = document.querySelector(`[data-id="${noteId}"].${action}-btn`);
-            btn.innerHTML = `<i class="fas fa-thumbs-${action === 'like' ? 'up' : 'down'}"></i> ${parseInt(btn.textContent.split(' ')[1]) + 1}`;
-            btn.classList.add('pulse');
-            setTimeout(() => btn.classList.remove('pulse'), 300);
-        }
-
-        addNoteForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await addNote(noteInput.value);
-            noteInput.value = '';
-        });
-
-        searchForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await fetchNotes(searchInput.value);
-        });
-
-        notesContainer.addEventListener('click', async (e) => {
-            const noteId = e.target.closest('button')?.dataset.id;
-            if (!noteId) return;
-            
-            if (e.target.closest('.like-btn')) {
-                await updateLikes(noteId, 'like');
-            } else if (e.target.closest('.dislike-btn')) {
-                await updateLikes(noteId, 'dislike');
-            } else if (e.target.closest('.delete-btn')) {
-                const password = prompt('Enter the password to delete this note:');
-                if (password === '1234') {
-                    await deleteNote(noteId);
-                } else {
-                    alert('Incorrect password');
+                function startDrag(event) {
+                    isDragging = true;
+                    if (event.type === 'touchstart') {
+                        offsetX = event.touches[0].clientX - noteEl.getBoundingClientRect().left;
+                        offsetY = event.touches[0].clientY - noteEl.getBoundingClientRect().top;
+                    } else {
+                        offsetX = event.clientX - noteEl.getBoundingClientRect().left;
+                        offsetY = event.clientY - noteEl.getBoundingClientRect().top;
+                    }
+                    document.addEventListener('mousemove', drag);
+                    document.addEventListener('touchmove', drag);
+                    document.addEventListener('mouseup', stopDrag);
+                    document.addEventListener('touchend', stopDrag);
                 }
-            }
-        });
 
-        notesContainer.addEventListener('focusout', async (e) => {
-            if (e.target.classList.contains('note-content')) {
-                const noteId = e.target.nextElementSibling.querySelector('.like-btn').dataset.id;
-                await updateNote(noteId, e.target.textContent);
-            }
-        });
+                function drag(event) {
+                    if (!isDragging) return;
+                    if (event.type === 'touchmove') {
+                        noteEl.style.left = (event.touches[0].clientX - offsetX) + 'px';
+                        noteEl.style.top = (event.touches[0].clientY - offsetY) + 'px';
+                    } else {
+                        noteEl.style.left = (event.clientX - offsetX) + 'px';
+                        noteEl.style.top = (event.clientY - offsetY) + 'px';
+                    }
+                }
 
-        function startDragging(e) {
-            e.preventDefault();
-            const note = e.target.closest('.note');
-            const startX = e.clientX || e.touches[0].clientX;
-            const startY = e.clientY || e.touches[0].clientY;
-            const startLeft = note.offsetLeft;
-            const startTop = note.offsetTop;
+                function stopDrag() {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', drag);
+                    document.removeEventListener('touchmove', drag);
+                    document.removeEventListener('mouseup', stopDrag);
+                    document.removeEventListener('touchend', stopDrag);
+                    saveNotePosition(note.id, noteEl.style.top, noteEl.style.left);
+                }
 
-            function drag(e) {
-                const x = e.clientX || e.touches[0].clientX;
-                const y = e.clientY || e.touches[0].clientY;
-                const newLeft = startLeft + x - startX;
-                const newTop = startTop + y - startY;
-                note.style.left = `${Math.max(0, Math.min(newLeft, notesContainer.clientWidth - note.offsetWidth))}px`;
-                note.style.top = `${Math.max(0, Math.min(newTop, notesContainer.clientHeight - note.offsetHeight))}px`;
-            }
+                noteEl.querySelector('.delete-btn').addEventListener('click', function() {
+                    if (confirm('Are you sure you want to delete this note?')) {
+                        deleteNote(note.id);
+                    }
+                });
 
-            function stopDragging() {
-                document.removeEventListener('mousemove', drag);
-                document.removeEventListener('touchmove', drag);
-                document.removeEventListener('mouseup', stopDragging);
-                document.removeEventListener('touchend', stopDragging);
+                return noteEl;
             }
 
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('touchmove', drag);
-            document.addEventListener('mouseup', stopDragging);
-            document.addEventListener('touchend', stopDragging);
-        }
+            function saveNotePosition(id, top, left) {
+                fetch(`${apiUrl}/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ top, left })
+                }).then(response => response.json())
+                  .then(data => console.log('Note position updated:', data))
+                  .catch(error => console.error('Error updating note position:', error));
+            }
 
-        function animateNotes() {
-            const notes = document.querySelectorAll('.note');
-            notes.forEach(note => {
-                const x = parseFloat(note.style.left);
-                const y = parseFloat(note.style.top);
-                const newX = x + (Math.random() - 0.5) * 1;
-                const newY = y + (Math.random() - 0.5) * 1;
-                note.style.left = `${Math.max(0, Math.min(newX, notesContainer.clientWidth - note.offsetWidth))}px`;
-                note.style.top = `${Math.max(0, Math.min(newY, notesContainer.clientHeight - note.offsetHeight))}px`;
+            function deleteNote(id) {
+                fetch(`${apiUrl}/${id}`, { method: 'DELETE' })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Note deleted:', data);
+                        document.querySelector(`.note[data-id="${id}"]`).remove();
+                    })
+                    .catch(error => console.error('Error deleting note:', error));
+            }
+
+            function addNote(content) {
+                const color = getRandomColor();
+                const rotation = `${Math.random() * 10 - 5}deg`;
+                const top = `${Math.random() * (notesContainer.clientHeight - 100)}px`;
+                const left = `${Math.random() * (notesContainer.clientWidth - 150)}px`;
+
+                fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ content, color, rotation, top, left })
+                }).then(response => response.json())
+                  .then(note => {
+                      const noteEl = createNoteElement(note);
+                      notesContainer.appendChild(noteEl);
+                      noteInput.value = '';
+                  })
+                  .catch(error => console.error('Error adding note:', error));
+            }
+
+            function getRandomColor() {
+                const colors = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#FFB6C1'];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            function fetchNotes() {
+                fetch(apiUrl)
+                    .then(response => response.json())
+                    .then(notes => {
+                        notes.forEach(note => {
+                            const noteEl = createNoteElement(note);
+                            notesContainer.appendChild(noteEl);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching notes:', error));
+            }
+
+            addNoteForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const content = noteInput.value.trim();
+                if (content) {
+                    addNote(content);
+                }
             });
-            requestAnimationFrame(animateNotes);
-        }
 
-        fetchNotes().then(() => {
-            animateNotes();
+            searchForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const query = searchInput.value.trim().toLowerCase();
+                const notes = document.querySelectorAll('.note');
+                notes.forEach(note => {
+                    const content = note.querySelector('.note-content').textContent.toLowerCase();
+                    if (content.includes(query)) {
+                        note.style.display = 'block';
+                    } else {
+                        note.style.display = 'none';
+                    }
+                });
+            });
+
+            fetchNotes();
         });
     </script>
 </body>
