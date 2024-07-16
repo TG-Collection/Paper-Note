@@ -168,11 +168,11 @@
             transform: scale(1.1);
         }
 
-        #add-note-form, #search-form {
+        #add-note-form {
             display: flex;
-            gap: 20px;
+            gap: 10px;
             margin-bottom: 20px;
-            align-items: flex-start;
+            align-items: flex-end;
         }
 
         .input-wrapper {
@@ -182,7 +182,7 @@
             flex-direction: column;
         }
 
-        #note-input, #search-input {
+        #note-input {
             width: 100%;
             padding: 10px 15px;
             border: 1px solid #d3bc8d;
@@ -211,12 +211,10 @@
             font-size: 16px;
             font-weight: 600;
             transition: background 0.3s;
-            margin-left: 10px;
-            height: 42px;  /* Match the height of the input field */
+            height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
-            align-self: flex-end;
         }
 
         #add-note-btn:hover, #search-btn:hover {
@@ -302,10 +300,6 @@
         </div>
         <div id="main-container" style="display: none;">
             <button id="logout-btn">Logout</button>
-            <form id="search-form">
-                <input type="text" id="search-input" placeholder="Search messages" required>
-                <button type="submit" id="search-btn">Search</button>
-            </form>
             <div id="notes-container"></div>
             <form id="add-note-form">
                 <div class="input-wrapper">
@@ -313,10 +307,11 @@
                     <input type="text" id="note-input" placeholder="Enter your message" required>
                 </div>
                 <button type="submit" id="add-note-btn">Pin</button>
+                <button type="button" id="search-btn">Search</button>
             </form>
-        <footer>
-            <p>© 2024 | Made with ❤️ by <a href="https://t.me/meerazi" target="_blank">RAZi</a></p>
-        </footer>
+            <footer>
+                <p>© 2024 | Made with ❤️ by <a href="https://t.me/meerazi" target="_blank">RAZi</a></p>
+            </footer>
         </div>
     </div>
 
@@ -333,8 +328,6 @@
         const notesContainer = document.getElementById('notes-container');
         const addNoteForm = document.getElementById('add-note-form');
         const noteInput = document.getElementById('note-input');
-        const searchForm = document.getElementById('search-form');
-        const searchInput = document.getElementById('search-input');
         const logoutBtn = document.getElementById('logout-btn');
         const charCount = document.getElementById('char-count');
 
@@ -497,9 +490,11 @@
             charCount.textContent = '400 characters remaining';
         });
 
-        searchForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await fetchNotes(searchInput.value);
+        document.getElementById('search-btn').addEventListener('click', async () => {
+            const searchQuery = prompt("Enter search query:");
+            if (searchQuery !== null) {
+                await fetchNotes(searchQuery);
+            }
         });
 
         notesContainer.addEventListener('click', async (e) => {
@@ -573,4 +568,4 @@
             });
     </script>
 </body>
-</html>
+</html>            
