@@ -9,7 +9,7 @@ app = Quart(__name__)
 # MongoDB connection
 client = AsyncIOMotorClient(os.environ.get("MONGODB_URL"))
 db = client.floating_notes
-notes_collection = db.notes
+notes_collection = db[os.environ.get('NOTES_COLLECTION_NAME', 'notes')]
 
 # List of pastel colors for notes
 COLORS = [
