@@ -178,7 +178,8 @@
         .input-wrapper {
             flex-grow: 1;
             position: relative;
-            margin-right: 10px;
+            display: flex;
+            flex-direction: column;
         }
 
         #note-input, #search-input {
@@ -192,11 +193,9 @@
         }
 
         #char-count {
-            position: absolute;
-            right: 15px;
-            bottom: -20px;
             font-size: 0.8em;
             color: #666;
+            margin-bottom: 5px;
         }
 
         #add-note-btn, #search-btn {
@@ -210,6 +209,7 @@
             font-weight: 600;
             transition: background 0.3s;
             margin-left: 10px;
+            height: 42px;
         }
 
         #add-note-btn:hover, #search-btn:hover {
@@ -302,12 +302,11 @@
             <div id="notes-container"></div>
             <form id="add-note-form">
                 <div class="input-wrapper">
-                    <input type="text" id="note-input" placeholder="Enter your message" required>
                     <span id="char-count">400 characters remaining</span>
+                    <input type="text" id="note-input" placeholder="Enter your message" required>
                 </div>
                 <button type="submit" id="add-note-btn">Pin</button>
             </form>
-            <!-- ... footer ... -->
         <footer>
             <p>© 2024 | Made with ❤️ by <a href="https://t.me/meerazi" target="_blank">RAZi</a></p>
         </footer>
