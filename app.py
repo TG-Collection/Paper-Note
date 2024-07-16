@@ -62,14 +62,21 @@ async def add_note():
     if 'username' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
     data = await request.json
+    content = data['content']
+    
+    # Check word limit (approximately 400 characters)
+    if len(content) > 400:
+        return jsonify({'error': 'Note exceeds 400 character limit'}), 400
+    
     kolkata_tz = pytz.timezone('Asia/Kolkata')
     current_time = datetime.now(kolkata_tz)
     note = {
-        'content': data['content'],
+        'content': content,
         'likes': 0,
         'dislikes': 0,
         'username': session['username'],
-        'timestamp': current_time.strftime('%Y-%m-%d %H:%M:%S %Z')
+        'timestamp': current_time.strftime('%Y-%m-%d %H:%M:%S %Z'),
+        'pinned': False
     }
     result = await notes_collection.insert_one(note)
     note['_id'] = str(result.inserted_id)
@@ -84,8 +91,27 @@ async def get_notes():
         "username": session['username'],
         "content": {"$regex": search_query, "$options": "i"}
     } if search_query else {"username": session['username']}
-    notes = await notes_collection.find(query).to_list(length=None)
+    notes = await notes_collection.find(query).sort([("pinned", -1), ("timestamp", -1)]).to_list(length=None)
     return jsonify([{**note, '_id': str(note['_id'])} for note in notes])
+
+@app.route('/api/notes/<note_id>/pin', methods=['POST'])
+async def pin_note(note_id):
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    # Unpin all notes
+    await notes_collection.update_many(
+        {'username': session['username']},
+        {'$set': {'pinned': False}}
+    )
+    
+    # Pin the selected note
+    await notes_collection.update_one(
+        {'_id': ObjectId(note_id), 'username': session['username']},
+        {'$set': {'pinned': True}}
+    )
+    
+    return '', 204
 
 @app.route('/api/notes/<note_id>', methods=['PUT'])
 async def update_note(note_id):

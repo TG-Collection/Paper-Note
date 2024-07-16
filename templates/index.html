@@ -79,12 +79,37 @@
         }
 
         .note-timestamp {
-            font-size: 0.8em;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 0.7em;
             color: #666;
             font-style: italic;
-            margin-top: 5px;
+            background-color: rgba(244, 230, 201, 0.8);
+            padding: 2px 5px;
+            border-radius: 3px;
         }
-
+        .note-content {
+            padding-top: 20px;
+        }
+        .pin-btn {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+        }
+        .pin-btn.pinned {
+            color: #ff4d4d;
+        }
+        #char-count {
+            font-size: 0.8em;
+            color: #666;
+            margin-left: 10px;
+        }
         #notes-container {
             width: 100%;
             height: 60vh;
@@ -137,17 +162,6 @@
             transform: scale(1.05) rotate(1deg);
             box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.15), 0 0 5px rgba(0, 0, 0, 0.05) inset;
         } 
-
-        .note-content {
-            font-family: 'Source Sans Pro', sans-serif;
-            font-size: 0.9em;
-            color: #3a3a3a;
-            word-wrap: break-word;
-            max-height: calc(100% - 40px);
-            overflow-y: auto;
-            padding-left: 20px;
-            padding-top: 5px;
-        }
 
         .note-actions {
             display: flex;
@@ -362,15 +376,18 @@
             noteEl.style.setProperty('--hue', Math.floor(Math.random() * 360));
             noteEl.style.setProperty('--rotate', `${Math.random() * 6 - 3}deg`);
             noteEl.innerHTML = `
-                <div class="note-content">${note.content}</div>
+                <button class="pin-btn ${note.pinned ? 'pinned' : ''}" data-id="${note._id}">
+                    <i class="fas fa-thumbtack"></i>
+                </button>
                 <div class="note-timestamp">${note.timestamp}</div>
+                <div class="note-content">${note.content}</div>
                 <div class="note-actions">
                     <button class="like-btn" data-id="${note._id}"><i class="fas fa-thumbs-up"></i> ${note.likes}</button>
                     <button class="dislike-btn" data-id="${note._id}"><i class="fas fa-thumbs-down"></i> ${note.dislikes}</button>
                     <button class="delete-btn" data-id="${note._id}"><i class="fas fa-trash-alt"></i></button>
                 </div>
             `;
-            
+
             const left = Math.random() * (notesContainer.clientWidth - 300);
             const top = Math.random() * (notesContainer.clientHeight - 150);
             noteEl.style.left = `${left}px`;
@@ -428,10 +445,56 @@
             }
         }
 
+        async function pinNote(noteId) {
+            const response = await fetch(`/api/notes/${noteId}/pin`, { method: 'POST' });
+            if (response.ok) {
+                await fetchNotes();
+            } else {
+                showLoginForm();
+            }
+        }
+
+        notesContainer.addEventListener('click', async (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            const noteId = btn.dataset.id;
+            if (btn.classList.contains('like-btn')) {
+                await updateLikes(noteId, 'like');
+            } else if (btn.classList.contains('dislike-btn')) {
+                await updateLikes(noteId, 'dislike');
+            } else if (btn.classList.contains('delete-btn')) {
+                if (confirm('Are you sure you want to delete this note?')) {
+                    await deleteNote(noteId);
+                }
+            } else if (btn.classList.contains('pin-btn')) {
+                await pinNote(noteId);
+            }
+        });
+
+        // Add character count functionality
+        const charCount = document.createElement('span');
+        charCount.id = 'char-count';
+        noteInput.parentNode.insertBefore(charCount, noteInput.nextSibling);
+
+        noteInput.addEventListener('input', function() {
+            const remainingChars = 400 - this.value.length;
+            charCount.textContent = `${remainingChars} characters remaining`;
+            if (remainingChars < 0) {
+                charCount.style.color = 'red';
+            } else {
+                charCount.style.color = '#666';
+            }
+        });
+
         addNoteForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (noteInput.value.length > 400) {
+                alert('Note exceeds 400 character limit');
+                return;
+            }
             await addNote(noteInput.value);
             noteInput.value = '';
+            charCount.textContent = '400 characters remaining';
         });
 
         searchForm.addEventListener('submit', async (e) => {
