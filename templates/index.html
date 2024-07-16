@@ -74,33 +74,65 @@
         .note {
             background: #f4e6c9;
             border: 1px solid #d3bc8d;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 5px rgba(0, 0, 0, 0.05) inset;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1), 0 0 5px rgba(0, 0, 0, 0.05) inset;
             border-radius: 5px;
             padding: 15px;
             width: 180px;
+            height: 120px;
             position: absolute;
             cursor: move;
             transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .note::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 15px;
+            height: 15px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 
+                inset 0 0 5px rgba(0,0,0,0.2),
+                0 0 0 3px #f4e6c9,
+                0 0 0 5px #d3bc8d,
+                2px 2px 5px rgba(0,0,0,0.1);
+        } 
+
+        .note::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 50%);
+            pointer-events: none;
         }
 
         .note:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 5px rgba(0, 0, 0, 0.05) inset;
-        }
+            transform: scale(1.05) rotate(1deg);
+            box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.15), 0 0 5px rgba(0, 0, 0, 0.05) inset;
+        } 
 
         .note-content {
             font-family: 'Source Sans Pro', sans-serif;
             font-size: 0.9em;
             color: #3a3a3a;
             word-wrap: break-word;
-            max-height: calc(100% - 30px);
+            max-height: calc(100% - 40px);
             overflow-y: auto;
+            padding-left: 20px;
+            padding-top: 5px;
         }
 
         .note-actions {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             margin-top: 10px;
+            padding-right: 5px;
         }
 
         .like-btn, .dislike-btn, .delete-btn {
