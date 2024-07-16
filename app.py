@@ -22,8 +22,8 @@ async def index():
     return await render_template('index.html')
 
 @app.route("/status")
-async def status_handler(request):
-    return web.Response(status=200, text="Service is running")
+async def status_handler():
+    return jsonify({"status": "ok"})
 
 @app.route('/api/notes', methods=['GET'])
 async def get_notes():
