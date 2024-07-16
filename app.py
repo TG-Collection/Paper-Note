@@ -11,12 +11,6 @@ client = AsyncIOMotorClient(os.environ.get("MONGODB_URL"))
 db = client.floating_notes
 notes_collection = db[os.environ.get('NOTES_COLLECTION_NAME', 'notes')]
 
-# List of pastel colors for notes
-COLORS = [
-    "#FFB3BA", "#BAFFC9", "#BAE1FF", "#FFFFBA", "#FFDFBA",
-    "#E0BBE4", "#957DAD", "#D291BC", "#FEC8D8", "#FFDFD3"
-]
-
 @app.route('/')
 async def index():
     return await render_template('index.html')
@@ -38,8 +32,7 @@ async def add_note():
     note = {
         'content': data['content'],
         'likes': 0,
-        'dislikes': 0,
-        'color': random.choice(COLORS)
+        'dislikes': 0
     }
     result = await notes_collection.insert_one(note)
     note['_id'] = str(result.inserted_id)
