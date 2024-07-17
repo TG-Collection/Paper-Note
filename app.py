@@ -41,8 +41,8 @@ async def list_public_spaces():
         public_spaces.append({
             'id': space['_id'],
             'short_code': space['short_code'],
-            'creator': space['creator'],
             'created_at': space['created_at'].isoformat(),
+            'creator': space['creator'],
             'note_count': len(space['notes'])
         })
     
