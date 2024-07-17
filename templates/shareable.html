@@ -174,7 +174,7 @@
         footer a:hover {
             color: #8c6142;
         }
-        
+
         .add-note-form {
             margin-top: 20px;
             background: rgba(255, 255, 240, 0.7);
@@ -242,50 +242,69 @@
             background: #f4e6c9;
             border: 1px solid #d3bc8d;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1), 0 0 5px rgba(0, 0, 0, 0.05) inset;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 15px;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
         }
 
         .note-actions {
             display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
+            justify-content: flex-start;
+            gap: 10px;
+            margin-top: 15px;
         }
 
         .note-actions button {
             background: #a67c52;
             color: #fff;
             border: none;
-            padding: 5px 10px;
-            border-radius: 3px;
+            padding: 8px 15px;
+            border-radius: 20px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
         }
 
         .note-actions button:hover {
             background: #8c6142;
-        }
-        .pin-button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            margin: 2px 2px;
-            cursor: pointer;
-            border-radius: 3px;
+            transform: scale(1.05);
         }
 
-        .pinned {
-            background-color: #45a049;
+        .note-actions button:active {
+            transform: scale(0.98);
         }
+
+        .pin-button {
+            background-color: #4CAF50 !important;
+        }
+
+        .pin-button.pinned {
+            background-color: #45a049 !important;
+        }
+
+        .note-username {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .note-timestamp {
+            font-size: 0.8em;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        .note-content {
+            font-size: 1em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
         .pinned-note {
-            background-color: #fffacd; /* Light yellow background */
-            border: 2px solid #ffd700; /* Gold border */
+            background-color: #fffacd;
+            border: 2px solid #ffd700;
         }
 
         .pin-button.pinned {
@@ -539,6 +558,7 @@
             document.getElementById('add-note-btn').addEventListener('click', addNote);
             document.getElementById('shareable-link').addEventListener('click', copyShareableLink);
         }
+
         // Move the event listener for delete-space-btn outside of displayNotes function
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('delete-space-btn').addEventListener('click', deleteSharedSpace);
