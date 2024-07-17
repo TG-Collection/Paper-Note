@@ -276,6 +276,23 @@
             background: #8c6142;
         }
 
+        #public-space-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            background: #a67c52;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #public-space-btn:hover {
+            background: #8c6142;
+        }
+
         footer {
             text-align: center;
             padding: 20px 0;
@@ -308,6 +325,7 @@
         </div>
         <div id="main-container" style="display: none;">
             <button id="logout-btn">Logout</button>
+            <button id="public-space-btn">Public Space</button>
             <div id="notes-container"></div>
             <form id="add-note-form">
                 <div class="input-wrapper">
@@ -560,6 +578,11 @@
         }
 
         logoutBtn.addEventListener('click', handleLogout);
+
+        // Add event listener for the public space button
+        document.getElementById('public-space-btn').addEventListener('click', () => {
+            window.location.href = '/public-space';
+        });
 
         // Check if the user is already logged in
         fetch('/api/notes')
