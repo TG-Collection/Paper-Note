@@ -276,10 +276,10 @@
             background: #8c6142;
         }
 
-        #public-space-btn {
+        #create-public-space-btn,
+        #go-to-public-space-btn {
             position: absolute;
             top: 10px;
-            left: 10px;
             padding: 5px 10px;
             background: #a67c52;
             color: #fff;
@@ -289,7 +289,17 @@
             transition: background 0.3s;
         }
 
-        #public-space-btn:hover {
+        #create-public-space-btn {
+            left: 10px;
+        }
+
+        #go-to-public-space-btn {
+            left: 140px;
+            display: none;
+        }
+
+        #create-public-space-btn:hover,
+        #go-to-public-space-btn:hover {
             background: #8c6142;
         }
 
@@ -325,7 +335,8 @@
         </div>
         <div id="main-container" style="display: none;">
             <button id="logout-btn">Logout</button>
-            <button id="public-space-btn">Public Space</button>
+            <button id="create-public-space-btn">Create Public Space</button>
+            <button id="go-to-public-space-btn">Go to Public Space</button>
             <div id="notes-container"></div>
             <form id="add-note-form">
                 <div class="input-wrapper">
@@ -414,13 +425,6 @@
             } else {
                 alert('Registration failed. Please try again.');
             }
-        }
-
-        async function handleLogout() {
-            await fetch('/logout');
-            authContainer.style.display = 'block';
-            mainContainer.style.display = 'none';
-            showLoginForm();
         }
 
         function createNoteElement(note) {
@@ -579,12 +583,41 @@
 
         logoutBtn.addEventListener('click', handleLogout);
 
-        // Add event listener for the public space button
-        document.getElementById('public-space-btn').addEventListener('click', () => {
-            window.location.href = '/public-space';
+        const createPublicSpaceBtn = document.getElementById('create-public-space-btn');
+        const goToPublicSpaceBtn = document.getElementById('go-to-public-space-btn');
+        let publicSpaceLink = '';
+
+        createPublicSpaceBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/create_public_space', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    publicSpaceLink = data.public_link;
+                    goToPublicSpaceBtn.style.display = 'block';
+                    alert('Public space created successfully!');
+                } else {
+                    alert('Failed to create public space. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error creating public space:', error);
+                alert('An error occurred while creating the public space.');
+            }
         });
 
-        // Check if the user is already logged in
+        goToPublicSpaceBtn.addEventListener('click', () => {
+            if (publicSpaceLink) {
+                window.location.href = publicSpaceLink;
+            } else {
+                alert('Please create a public space first.');
+            }
+        });
+
+        // Modify the existing code that checks if the user is logged in
         fetch('/api/notes')
             .then(response => {
                 if (response.ok) {
@@ -593,10 +626,27 @@
                     fetchNotes().then(() => {
                         animateNotes();
                     });
+                    // Check if there's an existing public space link in local storage
+                    const savedPublicSpaceLink = localStorage.getItem('publicSpaceLink');
+                    if (savedPublicSpaceLink) {
+                        publicSpaceLink = savedPublicSpaceLink;
+                        goToPublicSpaceBtn.style.display = 'block';
+                    }
                 } else {
                     showLoginForm();
                 }
             });
+
+        // Add this to save the public space link when logging out
+        async function handleLogout() {
+            if (publicSpaceLink) {
+                localStorage.setItem('publicSpaceLink', publicSpaceLink);
+            }
+            await fetch('/logout');
+            authContainer.style.display = 'block';
+            mainContainer.style.display = 'none';
+            showLoginForm();
+        }
     </script>
 </body>
 </html>            
