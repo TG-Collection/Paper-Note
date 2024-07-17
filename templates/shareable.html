@@ -455,8 +455,8 @@
         }
 
         function displayNotes(notes) {
-        // Sort notes by timestamp in descending order
-            notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            // Sort notes by timestamp in descending order
+            notes.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
