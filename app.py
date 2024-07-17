@@ -199,7 +199,7 @@ async def public_space(short_code):
     space = await public_spaces_collection.find_one({'short_code': short_code})
     if not space:
         return 'Public space not found', 404
-    return await render_template('shareable.html', space=space)
+    return await render_template('share.html', space=space)
 
 @app.route('/')
 async def index():
