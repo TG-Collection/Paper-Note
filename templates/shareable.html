@@ -158,26 +158,6 @@
             background: #c1aa7b;
         }
 
-        .shareable-link {
-            margin-top: 20px;
-            padding: 15px; /* Increased padding for better spacing */
-            background: linear-gradient(145deg, #e6ddc4, #cab17a); /* Vintage brownish color scheme */
-            border: 1px solid #d2c295; /* Soft brown border for a vintage look */
-            border-radius: 10px; /* Rounded corners */
-            font-size: 1em; /* Slightly larger font size for readability */
-            color: #5a4a32; /* Dark brown text color for contrast */
-            box-shadow: 0 4px 8px rgba(107, 96, 71, 0.2); /* Subtle shadow for depth, in a brownish tone */
-            cursor: pointer; /* Pointer cursor to indicate it's clickable */
-            display: inline-block; /* To properly align and make it easy to copy */
-            word-break: break-word; /* Ensures long links don't overflow */
-            transition: transform 0.2s ease-in-out; /* Smooth transform on hover */
-        }
-        
-        .shareable-link:hover {
-            transform: scale(1.05); /* Slightly enlarges on hover for interaction feedback */
-            box-shadow: 0 6px 12px rgba(107, 96, 71, 0.3); /* Increased shadow for emphasis, in a brownish tone */
-        }
-
         footer {
             text-align: center;
             padding: 20px 0;
@@ -307,18 +287,6 @@
         .pinned {
             background-color: #45a049;
         }
-        .delete-space-btn {
-            background-color: #f44336;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        .delete-space-btn:hover {
-            background-color: #d32f2f;
-        }
         .pinned-note {
             background-color: #fffacd; /* Light yellow background */
             border: 2px solid #ffd700; /* Gold border */
@@ -326,6 +294,68 @@
 
         .pin-button.pinned {
             background-color: #ffd700; /* Gold background for pinned button */
+        }
+        .button, button {
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .shareable-link {
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(145deg, #e6ddc4, #cab17a);
+            border: 1px solid #d2c295;
+            border-radius: 25px;
+            font-size: 1em;
+            color: #5a4a32;
+            box-shadow: 0 4px 8px rgba(107, 96, 71, 0.2);
+            cursor: pointer;
+            display: inline-block;
+            word-break: break-word;
+            transition: all 0.3s ease;
+        }
+        
+        .shareable-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(107, 96, 71, 0.3);
+        }
+
+        .shareable-link:active {
+            transform: scale(0.98);
+        }
+
+        .delete-space-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .delete-space-btn:hover {
+            background-color: #d32f2f;
+            transform: scale(1.05);
+        }
+
+        .delete-space-btn:active {
+            transform: scale(0.98);
+        }
+
+        .top-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        #copy-feedback {
+            display: none;
+            color: #4CAF50;
+            margin-left: 10px;
+            font-style: italic;
         }
     </style>
 </head>
@@ -455,12 +485,17 @@
         }
 
         function displayNotes(notes) {
-            // Sort notes by timestamp in descending order
             notes.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
-                <div class="shareable-link">Shareable Link: ${window.location.origin}/pub/${shortCode}</div>
+                <div class="top-controls">
+                    <button id="delete-space-btn" class="delete-space-btn">Delete Shared Space</button>
+                    <div>
+                        <span class="shareable-link" id="shareable-link">Shareable Link: ${window.location.origin}/pub/${shortCode}</span>
+                        <span id="copy-feedback">Copied!</span>
+                    </div>
+                </div>
                 <div class="add-note-form">
                     <h2>Add New Note</h2>
                     <textarea id="new-note-content" placeholder="Enter your note here (max 400 characters)"></textarea>
@@ -485,11 +520,27 @@
                         </div>
                     `).join('')}
                 </div>
-                <button id="delete-space-btn" class="delete-space-btn">Delete Shared Space</button>
             `;
 
             document.getElementById('add-note-btn').addEventListener('click', addNote);
             document.getElementById('delete-space-btn').addEventListener('click', deleteSharedSpace);
+            document.getElementById('shareable-link').addEventListener('click', copyShareableLink);
+        }
+
+        function copyShareableLink() {
+            const shareableLink = document.getElementById('shareable-link');
+            const tempInput = document.createElement('input');
+            tempInput.value = shareableLink.textContent.split(': ')[1];
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            const copyFeedback = document.getElementById('copy-feedback');
+            copyFeedback.style.display = 'inline';
+            setTimeout(() => {
+                copyFeedback.style.display = 'none';
+            }, 2000);
         }
 
 
