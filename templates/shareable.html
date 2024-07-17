@@ -308,6 +308,14 @@
         .delete-space-btn:hover {
             background-color: #d32f2f;
         }
+        .pinned-note {
+            background-color: #fffacd; /* Light yellow background */
+            border: 2px solid #ffd700; /* Gold border */
+        }
+
+        .pin-button.pinned {
+            background-color: #ffd700; /* Gold background for pinned button */
+        }
     </style>
 </head>
 <body>
@@ -391,7 +399,7 @@
 
         async function deleteNote(noteId) {
             if (!noteId || noteId === 'undefined') {
-                alert('Invalid note ID. Cannot delete note.');
+                 alert('Invalid note ID. Cannot delete note.');
                 return;
             }
             if (confirm('Are you sure you want to delete this note?')) {
@@ -445,11 +453,11 @@
                     <button id="add-note-btn">Add Note</button>
                 </div>
                 <div class="notes-container">
-                    ${notes.map(note => `
-                        <div class="note">
+                     ${notes.map(note => `
+                        <div class="note ${note.pinned ? 'pinned-note' : ''}">
                             <div class="note-username">${note.username}</div>
                             <div class="note-timestamp">${note.timestamp}</div>
-                             <div class="note-content">${note.content}</div>
+                            <div class="note-content">${note.content}</div>
                             <div class="note-actions">
                                 <button onclick="likeNote('${note._id}')">Like (${note.likes})</button>
                                 <button onclick="dislikeNote('${note._id}')">Dislike (${note.dislikes})</button>
@@ -469,7 +477,7 @@
             document.getElementById('add-note-btn').addEventListener('click', addNote);
             document.getElementById('delete-space-btn').addEventListener('click', deleteSharedSpace);
         }
-        
+
         async function addNote() {
             const content = document.getElementById('new-note-content').value.trim();
             if (!content) {
@@ -504,10 +512,18 @@
         }
 
         async function likeNote(noteId) {
+            if (!noteId || noteId === 'undefined') {
+                alert('Invalid note ID. Cannot like note.');
+                return;
+            }
             await updateNoteLikes(noteId, 'like');
         }
 
         async function dislikeNote(noteId) {
+            if (!noteId || noteId === 'undefined') {
+                alert('Invalid note ID. Cannot dislike note.');
+                return;
+            }
             await updateNoteLikes(noteId, 'dislike');
         }
 

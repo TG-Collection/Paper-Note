@@ -63,39 +63,40 @@ async def add_public_note(short_code):
     kolkata_tz = pytz.timezone('Asia/Kolkata')
     current_time = datetime.now(kolkata_tz)
     
+    # When adding a new note
     new_note = {
+        '_id': ObjectId(),  # Generate a new ObjectId
         'content': content,
         'username': session['username'],
         'timestamp': current_time.strftime('%Y-%m-%d %H:%M:%S %Z'),
         'likes': 0,
         'dislikes': 0
     }
-    
     result = await public_spaces_collection.update_one(
         {'short_code': short_code},
         {'$push': {'notes': new_note}}
-    )
-    
-    if result.modified_count == 0:
-        return jsonify({'error': 'Failed to add note'}), 500
-    
+    )  
+    new_note['_id'] = str(new_note['_id'])  # Convert ObjectId to string for JSON serialization
     return jsonify(new_note), 201
 
 @app.route('/api/public_spaces/<short_code>/notes', methods=['GET'])
 async def get_public_notes(short_code):
-    space = await public_spaces_collection.find_one({'short_code': short_code})
-    if not space:
-        return jsonify({'error': 'Public space not found'}), 404
-    
-    return jsonify(space['notes'])
+    notes = await public_spaces_collection.find({'short_code': short_code}).to_list(length=None)
+    serialized_notes = [{**note, '_id': str(note['_id'])} for note in notes]
+    return jsonify(serialized_notes)
 
 @app.route('/api/public_spaces/<short_code>/notes/<note_id>/like', methods=['POST'])
 async def like_public_note(short_code, note_id):
     if 'username' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
     
+    try:
+        object_id = ObjectId(note_id)
+    except InvalidId:
+        return jsonify({'error': 'Invalid note ID'}), 400
+    
     result = await public_spaces_collection.update_one(
-        {'short_code': short_code, 'notes._id': ObjectId(note_id)},
+        {'short_code': short_code, 'notes._id': object_id},
         {'$inc': {'notes.$.likes': 1}}
     )
     
@@ -109,8 +110,13 @@ async def dislike_public_note(short_code, note_id):
     if 'username' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
     
+    try:
+        object_id = ObjectId(note_id)
+    except InvalidId:
+        return jsonify({'error': 'Invalid note ID'}), 400
+    
     result = await public_spaces_collection.update_one(
-        {'short_code': short_code, 'notes._id': ObjectId(note_id)},
+        {'short_code': short_code, 'notes._id': object_id},
         {'$inc': {'notes.$.dislikes': 1}}
     )
     
@@ -118,6 +124,45 @@ async def dislike_public_note(short_code, note_id):
         return jsonify({'error': 'Note not found'}), 404
     
     return '', 204
+
+@app.route('/api/public_spaces/<short_code>/notes/<note_id>/pin', methods=['POST'])
+async def pin_public_note(short_code, note_id):
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        object_id = ObjectId(note_id)
+    except InvalidId:
+        return jsonify({'error': 'Invalid note ID'}), 400
+    
+    space = await public_spaces_collection.find_one({'short_code': short_code})
+    if not space:
+        return jsonify({'error': 'Public space not found'}), 404
+
+    note_to_pin = next((note for note in space['notes'] if note['_id'] == object_id), None)
+    if not note_to_pin or note_to_pin['username'] != session['username']:
+        return jsonify({'error': 'Note not found or you do not have permission to pin it'}), 404
+
+    # Toggle the pinned status
+    new_pinned_status = not note_to_pin.get('pinned', False)
+
+    # Unpin all notes if we're pinning a note
+    if new_pinned_status:
+        await public_spaces_collection.update_one(
+            {'short_code': short_code},
+            {'$set': {'notes.$[].pinned': False}}
+        )
+
+    # Update the pinned status of the specific note
+    result = await public_spaces_collection.update_one(
+        {'short_code': short_code, 'notes._id': object_id},
+        {'$set': {'notes.$.pinned': new_pinned_status}}
+    )
+    
+    if result.modified_count == 0:
+        return jsonify({'error': 'Failed to update note'}), 500
+    
+    return jsonify({'pinned': new_pinned_status}), 200
 
 @app.route('/api/public_spaces/<short_code>/notes/<note_id>', methods=['DELETE'])
 async def delete_public_note(short_code, note_id):
@@ -136,33 +181,6 @@ async def delete_public_note(short_code, note_id):
     
     if result.modified_count == 0:
         return jsonify({'error': 'Note not found or you do not have permission to delete it'}), 404
-    
-    return '', 204
-
-@app.route('/api/public_spaces/<short_code>/notes/<note_id>/pin', methods=['POST'])
-async def pin_public_note(short_code, note_id):
-    if 'username' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    try:
-        object_id = ObjectId(note_id)
-    except InvalidId:
-        return jsonify({'error': 'Invalid note ID'}), 400
-    
-    # First, unpin all notes in the space
-    await public_spaces_collection.update_one(
-        {'short_code': short_code},
-        {'$set': {'notes.$[].pinned': False}}
-    )
-    
-    # Then, pin the selected note
-    result = await public_spaces_collection.update_one(
-        {'short_code': short_code, 'notes': {'$elemMatch': {'_id': object_id, 'username': session['username']}}},
-        {'$set': {'notes.$.pinned': True}}
-    )
-    
-    if result.modified_count == 0:
-        return jsonify({'error': 'Note not found or you do not have permission to pin it'}), 404
     
     return '', 204
 
