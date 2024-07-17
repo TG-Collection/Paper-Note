@@ -174,36 +174,48 @@
         footer a:hover {
             color: #8c6142;
         }
-
+        
         .add-note-form {
             margin-top: 20px;
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 240, 0.7);
             padding: 20px;
-            border-radius: 5px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .add-note-form textarea {
-            width: 100%;
+            width: calc(100% - 40px);
             height: 100px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             padding: 10px;
             border: 1px solid #d3bc8d;
-            border-radius: 5px;
+            border-radius: 10px;
             resize: vertical;
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 1em;
         }
 
-        .add-note-form button {
+        #add-note-btn {
             background: #a67c52;
             color: #fff;
             border: none;
             padding: 10px 20px;
-            border-radius: 5px;
+            border-radius: 25px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            font-size: 1em;
+            font-weight: 600;
         }
 
-        .add-note-form button:hover {
+        #add-note-btn:hover {
             background: #8c6142;
+            transform: scale(1.05);
+        }
+
+        #add-note-btn:active {
+            transform: scale(0.98);
         }
 
         .logo {
@@ -500,7 +512,6 @@
                     <span id="copy-feedback">Copied!</span>
                 </div>
                 <div class="add-note-form">
-                    <h2>Add New Note</h2>
                     <textarea id="new-note-content" placeholder="Enter your note here (max 400 characters)"></textarea>
                     <button id="add-note-btn">Add Note</button>
                 </div>
