@@ -308,68 +308,35 @@
         }
 
         .pin-button.pinned {
-            background-color: #ffd700;
+            background-color: #ffd700; /* Gold background for pinned button */
         }
-
         .button, button {
             border-radius: 25px;
             transition: all 0.3s ease;
         }
 
-        .shareable-link-container {
-            display: flex;
-            align-items: center;
+        .shareable-link {
+            margin-top: 20px;
+            padding: 15px;
             background: linear-gradient(145deg, #e6ddc4, #cab17a);
             border: 1px solid #d2c295;
             border-radius: 25px;
-            padding: 10px 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 8px rgba(107, 96, 71, 0.2);
-        }
-
-        .shareable-link-label {
-            font-weight: 600;
-            margin-right: 10px;
+            font-size: 1em;
             color: #5a4a32;
-        }
-
-        .shareable-link {
-            flex-grow: 1;
-            font-family: 'Source Sans Pro', sans-serif;
-            font-size: 0.9em;
-            color: #3a3a3a;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .copy-button {
-            background: #a67c52;
-            color: #fff;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(107, 96, 71, 0.2);
             cursor: pointer;
+            display: inline-block;
+            word-break: break-word;
             transition: all 0.3s ease;
-            font-size: 0.9em;
-            margin-left: 10px;
+        }
+        
+        .shareable-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(107, 96, 71, 0.3);
         }
 
-        .copy-button:hover {
-            background: #8c6142;
-            transform: translateY(-2px);
-        }
-
-        .copy-button:active {
-            transform: translateY(0);
-        }
-
-        #copy-feedback {
-            display: none;
-            color: #4CAF50;
-            margin-left: 10px;
-            font-style: italic;
-            font-size: 0.9em;
+        .shareable-link:active {
+            transform: scale(0.98);
         }
 
         .top-controls {
@@ -377,6 +344,13 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+        }
+
+        #copy-feedback {
+            display: none;
+            color: #4CAF50;
+            margin-left: 10px;
+            font-style: italic;
         }
 
         .top-navigation {
@@ -419,84 +393,23 @@
         .delete-space-btn:active {
             transform: scale(0.98);
         }
-
-        /* Login/Register specific styles */
-        .form-container {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #d3bc8d;
-            border-radius: 5px;
-            font-size: 1em;
-            background-color: rgba(255, 255, 255, 0.8);
-        }
-
-        .switch-form {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .switch-form a {
-            color: #a67c52;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .switch-form a:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 <body>
     <div class="vintage-background"></div>
     <div class="container">
         <div class="flower-background"></div>
-        <div id="login-register-container" style="display: none;">
-            <div class="logo">Paper Tag</div>
-            <div class="form-container">
-                <form id="loginForm" action="/api/login" method="POST">
-                    <div class="input-group">
-                        <label for="username">Username</label>
-                        <input type="text" id="username" name="username" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" required>
-                    </div>
-                    <button type="submit" class="button">Login</button>
-                </form>
-                <div class="switch-form">
-                    <p>Don't have an account? <a href="#" id="switchToRegister">Register</a></p>
-                </div>
+        <div class="top-navigation">
+            <a href="/" class="logo">Paper Tag</a>
+            <div class="button-group">
+                <a href="/" class="button">Home</a>
+                <button id="logout-btn" class="button">Logout</button>
+                <button id="delete-space-btn" class="delete-space-btn">Delete</button>
             </div>
         </div>
-        <div id="shared-space-container" style="display: none;">
-            <div class="top-navigation">
-                <a href="/" class="logo">Paper Tag</a>
-                <div class="button-group">
-                    <a href="/" class="button">Home</a>
-                    <button id="logout-btn" class="button">Logout</button>
-                    <button id="delete-space-btn" class="delete-space-btn">Delete</button>
-                </div>
-            </div>
-            <h1>Shared Space</h1>
-            <div id="content-area">
-                <!-- Content will be dynamically inserted here -->
-            </div>
+        <h1>Shared Space</h1>
+        <div id="content-area">
+            <!-- Content will be dynamically inserted here -->
         </div>
         <footer>
             <p>© 2024 | Made with ❤️ by <a href="https://t.me/meerazi" target="_blank">RAZi</a></p>
@@ -536,17 +449,11 @@
         async function fetchSharedSpace() {
             await checkLoginStatus();
             const contentArea = document.getElementById('content-area');
-            const loginRegisterContainer = document.getElementById('login-register-container');
-            const sharedSpaceContainer = document.getElementById('shared-space-container');
 
             if (!isLoggedIn) {
-                loginRegisterContainer.style.display = 'block';
-                sharedSpaceContainer.style.display = 'none';
+                window.location.href = `/auth?next=${encodeURIComponent(window.location.pathname)}`;
                 return;
             }
-
-            loginRegisterContainer.style.display = 'none';
-            sharedSpaceContainer.style.display = 'block';
 
             try {
                 const response = await fetch(`/api/public_spaces/${shortCode}/notes`);
@@ -613,10 +520,8 @@
 
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
-                <div class="shareable-link-container">
-                    <span class="shareable-link-label">Shareable Link:</span>
-                    <span class="shareable-link" id="shareable-link">${window.location.origin}/pub/${shortCode}</span>
-                    <button class="copy-button" id="copy-button">Copy</button>
+                <div>
+                    <span class="shareable-link" id="shareable-link">Shareable Link: ${window.location.origin}/pub/${shortCode}</span>
                     <span id="copy-feedback">Copied!</span>
                 </div>
                 <div class="add-note-form">
@@ -645,13 +550,13 @@
             `;
 
             document.getElementById('add-note-btn').addEventListener('click', addNote);
-            document.getElementById('copy-button').addEventListener('click', copyShareableLink);
+            document.getElementById('shareable-link').addEventListener('click', copyShareableLink);
         }
 
         function copyShareableLink() {
             const shareableLink = document.getElementById('shareable-link');
             const tempInput = document.createElement('input');
-            tempInput.value = shareableLink.textContent;
+            tempInput.value = shareableLink.textContent.split(': ')[1];
             document.body.appendChild(tempInput);
             tempInput.select();
             document.execCommand('copy');
@@ -663,6 +568,7 @@
                 copyFeedback.style.display = 'none';
             }, 2000);
         }
+
 
         async function addNote() {
             const content = document.getElementById('new-note-content').value.trim();
@@ -752,72 +658,15 @@
             }
         }
 
-        async function handleLogin(event) {
-            event.preventDefault();
-            const form = event.target;
-            const formData = new FormData(form);
-
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    fetchSharedSpace(); // This will check login status and show the appropriate view
-                } else {
-                    const error = await response.json();
-                    alert(error.error || 'An error occurred. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-            }
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
-            const loginForm = document.getElementById('loginForm');
-            const switchToRegister = document.getElementById('switchToRegister');
-            const logoutBtn = document.getElementById('logout-btn');
-            const deleteSpaceBtn = document.getElementById('delete-space-btn');
-
-            loginForm.addEventListener('submit', handleLogin);
-
-            switchToRegister.addEventListener('click', (e) => {
-                e.preventDefault();
-                loginForm.innerHTML = `
-                    <div class="input-group">
-                        <label for="username">Username</label>
-                        <input type="text" id="username" name="username" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="confirm-password">Confirm Password</label>
-                        <input type="password" id="confirm-password" name="confirm-password" required>
-                    </div>
-                    <button type="submit" class="button">Register</button>
-                `;
-                loginForm.action = '/api/register';
-                switchToRegister.textContent = 'Login';
-                switchToRegister.id = 'switchToLogin';
-                document.querySelector('.switch-form p').innerHTML = 'Already have an account? <a href="#" id="switchToLogin">Login</a>';
-                
-                document.getElementById('switchToLogin').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    location.reload();
-                });
-            });
-
-            logoutBtn.addEventListener('click', async () => {
+            document.getElementById('delete-space-btn').addEventListener('click', deleteSharedSpace);
+            document.getElementById('logout-btn').addEventListener('click', async () => {
                 try {
                     const response = await fetch('/api/logout', {
                         method: 'POST',
                     });
                     if (response.ok) {
-                        window.location.href = '/'; // Redirect to home page after logout
+                        window.location.href = '/auth'; // Redirect to auth page after logout
                     } else {
                         alert('Failed to logout. Please try again.');
                     }
@@ -826,11 +675,9 @@
                     alert('An error occurred while logging out.');
                 }
             });
-
-            deleteSpaceBtn.addEventListener('click', deleteSharedSpace);
-
-            fetchSharedSpace(); // Initial fetch of shared space data
         });
+
+        fetchSharedSpace();         
     </script>
 </body>
-</html>            
+</html>
