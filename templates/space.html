@@ -200,7 +200,7 @@
         .edit-topic-btn:hover {
             background: #45a049;
         }
-        
+
     </style>
 </head>
 <body>
@@ -241,8 +241,8 @@
             const container = document.getElementById('spaces-container');
             container.innerHTML = spaces.map(space => `
                 <div class="space-card" onclick="navigateToSpace('${space.short_code}')">
-                    <h3>Code: ${space.short_code}</h3>
-                    <h4>Topic: <span id="topic-${space.short_code}">${space.topic_name}</span></h4>
+                    <h3>Topic: <span id="topic-${space.short_code}">${space.topic_name}</span></h3>
+                    <h4>Code: ${space.short_code}</h4>
                     <div class="space-info">
                         <p>Created: ${new Date(space.created_at).toLocaleString()}</p>
                         <p>Notes: ${space.note_count}</p>
