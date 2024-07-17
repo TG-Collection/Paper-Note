@@ -661,22 +661,21 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('delete-space-btn').addEventListener('click', deleteSharedSpace);
             document.getElementById('logout-btn').addEventListener('click', async () => {
-                try {
-                    const response = await fetch('/api/logout', {
-                        method: 'POST',
-                    });
-                    if (response.ok) {
-                        window.location.href = '/auth'; // Redirect to auth page after logout
-                    } else {
-                        alert('Failed to logout. Please try again.');
-                    }
-                } catch (error) {
-                    console.error('Error logging out:', error);
-                    alert('An error occurred while logging out.');
+            try {
+                const response = await fetch('/api/public_logout', {
+                    method: 'POST',
+                });
+                if (response.ok) {
+                    window.location.href = '/auth'; // Redirect to auth page after logout
+                } else {
+                    alert('Failed to logout. Please try again.');
                 }
-            });
+            } catch (error) {
+                console.error('Error logging out:', error);
+                alert('An error occurred while logging out.');
+            }
         });
-
+        });
         fetchSharedSpace();         
     </script>
 </body>
