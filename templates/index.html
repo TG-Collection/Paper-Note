@@ -38,7 +38,11 @@
             max-width: 1200px;
             background: rgba(255, 253, 240, 0.7);
             border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 0 20px rgba(0, 0, 0, 0.08) inset;
+            box-shadow: 
+                0 4px 6px rgba(0, 0, 0, 0.1), 
+                0 0 20px rgba(0, 0, 0, 0.08) inset,
+                0 10px 20px rgba(0, 0, 0, 0.15),  /* New: Deeper shadow below */
+                0 0 0 1px rgba(0, 0, 0, 0.05);    /* New: Subtle border */
             position: relative;
             overflow: hidden;
             padding: 40px 40px 70px 40px;
@@ -98,10 +102,17 @@
             width: 100%;
             height: 60vh;
             overflow: hidden;
+            overflow-y: auto;
             position: relative;
             margin-bottom: 30px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
+        
         .note {
             background: #f4e6c9;
             border: 1px solid #d3bc8d;
@@ -118,19 +129,15 @@
         .note::before {
             content: '';
             position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 15px;
-            height: 15px;
-            background: #fff;
+            top: 7px; /* Adjust to move the circle inside */
+            left: 7px; /* Adjust to move the circle inside */
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            box-shadow: 
-                inset 0 0 5px rgba(0,0,0,0.2),
-                0 0 0 3px #f4e6c9,
-                0 0 0 5px #d3bc8d,
-                2px 2px 5px rgba(0,0,0,0.1);
-        } 
-
+            border: 2px double #d3bc8d;
+            background-color: rgba(244, 230, 201, 0.5);
+        }
+        
         .note::after {
             content: '';
             position: absolute;
@@ -141,6 +148,7 @@
             background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 50%);
             pointer-events: none;
         }
+
 
         .note:hover {
             transform: scale(1.05) rotate(1deg);
@@ -168,11 +176,11 @@
             transform: scale(1.1);
         }
 
-        #add-note-form, #search-form {
+        #add-note-form {
             display: flex;
-            gap: 20px;
+            gap: 10px;
             margin-bottom: 20px;
-            align-items: flex-start;
+            align-items: flex-end;
         }
 
         .input-wrapper {
@@ -182,7 +190,7 @@
             flex-direction: column;
         }
 
-        #note-input, #search-input {
+        #note-input {
             width: 100%;
             padding: 10px 15px;
             border: 1px solid #d3bc8d;
@@ -211,12 +219,10 @@
             font-size: 16px;
             font-weight: 600;
             transition: background 0.3s;
-            margin-left: 10px;
-            height: 42px;  /* Match the height of the input field */
+            height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
-            align-self: flex-end;
         }
 
         #add-note-btn:hover, #search-btn:hover {
@@ -302,10 +308,6 @@
         </div>
         <div id="main-container" style="display: none;">
             <button id="logout-btn">Logout</button>
-            <form id="search-form">
-                <input type="text" id="search-input" placeholder="Search messages" required>
-                <button type="submit" id="search-btn">Search</button>
-            </form>
             <div id="notes-container"></div>
             <form id="add-note-form">
                 <div class="input-wrapper">
@@ -313,10 +315,11 @@
                     <input type="text" id="note-input" placeholder="Enter your message" required>
                 </div>
                 <button type="submit" id="add-note-btn">Pin</button>
+                <button type="button" id="search-btn">Search</button>
             </form>
-        <footer>
-            <p>© 2024 | Made with ❤️ by <a href="https://t.me/meerazi" target="_blank">RAZi</a></p>
-        </footer>
+            <footer>
+                <p>© 2024 | Made with ❤️ by <a href="https://t.me/meerazi" target="_blank">RAZi</a></p>
+            </footer>
         </div>
     </div>
 
@@ -333,8 +336,6 @@
         const notesContainer = document.getElementById('notes-container');
         const addNoteForm = document.getElementById('add-note-form');
         const noteInput = document.getElementById('note-input');
-        const searchForm = document.getElementById('search-form');
-        const searchInput = document.getElementById('search-input');
         const logoutBtn = document.getElementById('logout-btn');
         const charCount = document.getElementById('char-count');
 
@@ -497,9 +498,11 @@
             charCount.textContent = '400 characters remaining';
         });
 
-        searchForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await fetchNotes(searchInput.value);
+        document.getElementById('search-btn').addEventListener('click', async () => {
+            const searchQuery = prompt("Enter search query:");
+            if (searchQuery !== null) {
+                await fetchNotes(searchQuery);
+            }
         });
 
         notesContainer.addEventListener('click', async (e) => {
@@ -573,4 +576,4 @@
             });
     </script>
 </body>
-</html>
+</html>            
