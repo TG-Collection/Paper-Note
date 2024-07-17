@@ -28,10 +28,3 @@ We welcome contributions to Paper Tag! If you have suggestions for improvements 
 ## License
 
 Paper Tag is released under the MIT License. See the LICENSE file for more details.
-
-## Acknowledgments
-
-- **Motor:** For providing an asynchronous MongoDB driver.
-- **Quart:** For its powerful and easy-to-use asynchronous web framework capabilities.
-
-Thank you for choosing Paper Tag for your note-taking needs. Enjoy the blend of vintage aesthetics and modern technology as you capture your thoughts and ideas.
