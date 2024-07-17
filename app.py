@@ -194,12 +194,39 @@ async def delete_public_space(short_code):
     
     return '', 204
 
+@app.route('/api/public_login', methods=['POST'])
+async def public_login():
+    data = await request.json
+    username = data.get('username')
+    password = data.get('password')
+    user = await users_collection.find_one({'username': username})
+    if user and check_password_hash(user['password'], password):
+        session['username'] = username
+        return jsonify({'success': True, 'username': username}), 200
+    return jsonify({'error': 'Invalid username or password'}), 401
+
+@app.route('/api/public_logout', methods=['POST'])
+async def public_logout():
+    session.pop('username', None)
+    return jsonify({'success': True}), 200
+
 @app.route('/pub/<short_code>')
 async def public_space(short_code):
     space = await public_spaces_collection.find_one({'short_code': short_code})
     if not space:
         return await render_template('error.html', error_code=404, error_message="Invalid URL", error_description="Public space not found"), 404
+    
+    # Check if user is logged in
+    if 'username' not in session:
+        # If not logged in, redirect to the auth page with the current URL as the 'next' parameter
+        return redirect(url_for('auth', next=f'/pub/{short_code}'))
+    
     return await render_template('share.html', space=space)
+
+@app.route('/auth')
+async def auth():
+    next_url = request.args.get('next', '/')
+    return await render_template('auth.html', next_url=next_url)
 
 @app.route('/')
 async def index():
