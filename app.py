@@ -198,7 +198,7 @@ async def delete_public_space(short_code):
 async def public_space(short_code):
     space = await public_spaces_collection.find_one({'short_code': short_code})
     if not space:
-        return await render_template('error.html', error_code=404, error_message="Unauthorized acess", error_description="Public space not found"), 404
+        return await render_template('error.html', error_code=404, error_message="Unauthorized access", error_description="Public space not found"), 404
     return await render_template('share.html', space=space)
 
 @app.route('/')
