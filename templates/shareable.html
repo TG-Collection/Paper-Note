@@ -160,13 +160,24 @@
 
         .shareable-link {
             margin-top: 20px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 5px;
-            font-size: 0.9em;
-            word-break: break-all;
+            padding: 15px; /* Increased padding for better spacing */
+            background: linear-gradient(145deg, #6e8efb, #88d3ce); /* Gradient background for appeal */
+            border: 1px solid #ffffff; /* White border for contrast */
+            border-radius: 10px; /* Rounded corners */
+            font-size: 1em; /* Slightly larger font size for readability */
+            color: #ffffff; /* White text color for contrast */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+            cursor: pointer; /* Pointer cursor to indicate it's clickable */
+            display: inline-block; /* To properly align and make it easy to copy */
+            word-break: break-word; /* Ensures long links don't overflow */
+            transition: transform 0.2s ease-in-out; /* Smooth transform on hover */
         }
 
+        .shareable-link:hover {
+            transform: scale(1.05); /* Slightly enlarges on hover for interaction feedback */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Increased shadow for emphasis */
+        }
+        
         footer {
             text-align: center;
             padding: 20px 0;
@@ -444,6 +455,9 @@
         }
 
         function displayNotes(notes) {
+        // Sort notes by timestamp in descending order
+            notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
                 <div class="shareable-link">Shareable Link: ${window.location.origin}/pub/${shortCode}</div>
@@ -453,7 +467,7 @@
                     <button id="add-note-btn">Add Note</button>
                 </div>
                 <div class="notes-container">
-                     ${notes.map(note => `
+                    ${notes.map(note => `
                         <div class="note ${note.pinned ? 'pinned-note' : ''}">
                             <div class="note-username">${note.username}</div>
                             <div class="note-timestamp">${note.timestamp}</div>
@@ -477,6 +491,7 @@
             document.getElementById('add-note-btn').addEventListener('click', addNote);
             document.getElementById('delete-space-btn').addEventListener('click', deleteSharedSpace);
         }
+
 
         async function addNote() {
             const content = document.getElementById('new-note-content').value.trim();
