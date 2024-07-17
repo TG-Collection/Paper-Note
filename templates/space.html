@@ -109,14 +109,6 @@
             transform: scale(0.98);
         }
 
-        #logout-btn {
-            background: #d3bc8d;
-        }
-
-        #logout-btn:hover {
-            background: #c1aa7b;
-        }
-
         .spaces-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -168,7 +160,7 @@
         .delete-btn:hover {
             background: #d32f2f;
         }
-        
+
         #home-btn {
             background: #8c6142;
         }
@@ -203,7 +195,6 @@
             <div>
                 <button id="home-btn" class="button">Home</button>
                 <button id="create-space-btn" class="button">New Space</button>
-                <button id="logout-btn" class="button">Logout</button>
             </div>
         </div>
         <h1>My Spaces</h1>
@@ -291,24 +282,10 @@
             }
         }
 
-        async function logout() {
-            try {
-                const response = await fetch('/api/public_logout', { method: 'POST' });
-                if (response.ok) {
-                    window.location.href = '/auth';
-                } else {
-                    console.error('Failed to logout');
-                }
-            } catch (error) {
-                console.error('Error logging out:', error);
-            }
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             fetchPublicSpaces();
             document.getElementById('home-btn').addEventListener('click', () => window.location.href = '/');
             document.getElementById('create-space-btn').addEventListener('click', createNewSpace);
-            document.getElementById('logout-btn').addEventListener('click', logout);
         });
     </script>
 </body>
