@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paper Tag - My Spaces</title>
+    <title>My Spaces - Paper Tag</title>
     <link rel="icon" type="image/png" href="/static/icon/logo.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400;600&display=swap');
@@ -27,9 +27,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feBlend mode="multiply" in="SourceGraphic" result="monoNoise"/><feColorMatrix in="monoNoise" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.5 0"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.1"/></svg>'), radial-gradient(circle, #d2b48c, #a67c52);
+            background-image: 
+                linear-gradient(rgba(210, 180, 140, 0.5), rgba(210, 180, 140, 0.5)),
+                url('/static/icon/pattern.png');
             background-size: cover;
-            filter: url('#paper-texture');
             z-index: -1;
         }
 
@@ -109,6 +110,14 @@
             transform: scale(0.98);
         }
 
+        #home-btn {
+            background: #8c6142;
+        }
+
+        #home-btn:hover {
+            background: #6e4c34;
+        }
+
         .spaces-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -161,14 +170,6 @@
             background: #d32f2f;
         }
 
-        #home-btn {
-            background: #8c6142;
-        }
-
-        #home-btn:hover {
-            background: #6e4c34;
-        }
-
         footer {
             text-align: center;
             padding: 20px 0;
@@ -205,13 +206,6 @@
             <p>© 2024 | Made with ❤️ by <a href="https://t.me/meerazi" target="_blank">RAZi</a></p>
         </footer>
     </div>
-
-    <svg width="0" height="0">
-        <filter id="paper-texture">
-            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5"/>
-            <feDisplacementMap in="SourceGraphic" scale="5"/>
-        </filter>
-    </svg>
 
     <script>
         async function fetchPublicSpaces() {
