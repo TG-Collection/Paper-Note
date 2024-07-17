@@ -206,22 +206,6 @@
             background: #8c6142;
         }
 
-        .top-navigation {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 10px;
-            background: rgba(255, 253, 240, 0.8);
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .top-navigation .button {
-            font-size: 0.9em;
-            padding: 8px 15px;
-        }
-
         .logo {
             font-family: 'Playfair Display', serif;
             font-size: 1.2em;
@@ -324,26 +308,6 @@
             transform: scale(0.98);
         }
 
-        .delete-space-btn {
-            background-color: #f44336;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .delete-space-btn:hover {
-            background-color: #d32f2f;
-            transform: scale(1.05);
-        }
-
-        .delete-space-btn:active {
-            transform: scale(0.98);
-        }
-
         .top-controls {
             display: flex;
             justify-content: space-between;
@@ -357,6 +321,47 @@
             margin-left: 10px;
             font-style: italic;
         }
+
+        .top-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(255, 253, 240, 0.8);
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-navigation .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .top-navigation .button {
+            font-size: 0.9em;
+            padding: 8px 15px;
+        }
+
+        .delete-space-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .delete-space-btn:hover {
+            background-color: #d32f2f;
+            transform: scale(1.05);
+        }
+
+        .delete-space-btn:active {
+            transform: scale(0.98);
+        }
     </style>
 </head>
 <body>
@@ -365,9 +370,10 @@
         <div class="flower-background"></div>
         <div class="top-navigation">
             <a href="/" class="logo">Paper Tag</a>
-            <div>
+            <div class="button-group">
                 <a href="/" class="button">Home</a>
                 <button id="logout-btn" class="button">Logout</button>
+                <button id="delete-space-btn" class="delete-space-btn">Delete Space</button>
             </div>
         </div>
         <h1>Shared Space</h1>
@@ -489,12 +495,9 @@
 
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
-                <div class="top-controls">
-                    <button id="delete-space-btn" class="delete-space-btn">Delete Shared Space</button>
-                    <div>
-                        <span class="shareable-link" id="shareable-link">Shareable Link: ${window.location.origin}/pub/${shortCode}</span>
-                        <span id="copy-feedback">Copied!</span>
-                    </div>
+                <div>
+                    <span class="shareable-link" id="shareable-link">Shareable Link: ${window.location.origin}/pub/${shortCode}</span>
+                    <span id="copy-feedback">Copied!</span>
                 </div>
                 <div class="add-note-form">
                     <h2>Add New Note</h2>
@@ -523,9 +526,12 @@
             `;
 
             document.getElementById('add-note-btn').addEventListener('click', addNote);
-            document.getElementById('delete-space-btn').addEventListener('click', deleteSharedSpace);
             document.getElementById('shareable-link').addEventListener('click', copyShareableLink);
         }
+        // Move the event listener for delete-space-btn outside of displayNotes function
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('delete-space-btn').addEventListener('click', deleteSharedSpace);
+        });
 
         function copyShareableLink() {
             const shareableLink = document.getElementById('shareable-link');
