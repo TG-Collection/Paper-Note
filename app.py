@@ -22,43 +22,13 @@ public_spaces_collection = db['public_spaces']
 def generate_short_code(length=6):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
-
-
-@app.route('/api/public_spaces', methods=['GET'])
-async def list_public_spaces():
-    if 'username' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    username = session['username']
-    
-    # Find all public spaces created by the user
-    cursor = public_spaces_collection.find({'creator': username})
-    
-    # Convert the cursor to a list and serialize the ObjectId fields
-    public_spaces = []
-    async for space in cursor:
-        space['_id'] = str(space['_id'])
-        public_spaces.append({
-            'id': space['_id'],
-            'short_code': space['short_code'],
-            'created_at': space['created_at'].isoformat(),
-            'creator': space['creator'],
-            'note_count': len(space['notes'])
-        })
-    
-    return jsonify(public_spaces), 200
-
-@app.route('/spaces')
-async def spaces():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    return await render_template('space.html')
-
-
 @app.route('/api/create_public_space', methods=['POST'])
 async def create_public_space():
     if 'username' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = await request.json
+    topic_name = data.get('topic_name', 'No Name')
     
     short_code = generate_short_code()  
     while await public_spaces_collection.find_one({'short_code': short_code}):
@@ -69,12 +39,63 @@ async def create_public_space():
         'creator': session['username'],
         'created_at': datetime.now(pytz.timezone('Asia/Kolkata')),
         'last_updated': datetime.now(pytz.timezone('Asia/Kolkata')),
+        'topic_name': topic_name,
         'notes': []
     }
     
     result = await public_spaces_collection.insert_one(new_space)
     
     return jsonify({'public_link': f'/pub/{short_code}', 'space_id': str(result.inserted_id)}), 201
+
+@app.route('/api/public_spaces', methods=['GET'])
+async def list_public_spaces():
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    username = session['username']
+    
+    cursor = public_spaces_collection.find({'creator': username})
+    
+    public_spaces = []
+    async for space in cursor:
+        space['_id'] = str(space['_id'])
+        public_spaces.append({
+            'id': space['_id'],
+            'short_code': space['short_code'],
+            'created_at': space['created_at'].isoformat(),
+            'creator': space['creator'],
+            'topic_name': space.get('topic_name', 'No Name'),
+            'note_count': len(space['notes'])
+        })
+    
+    return jsonify(public_spaces), 200
+
+@app.route('/api/public_spaces/<short_code>/edit_topic', methods=['PUT'])
+async def edit_topic_name(short_code):
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = await request.json
+    new_topic_name = data.get('topic_name')
+    
+    if not new_topic_name:
+        return jsonify({'error': 'Topic name is required'}), 400
+    
+    result = await public_spaces_collection.update_one(
+        {'short_code': short_code, 'creator': session['username']},
+        {'$set': {'topic_name': new_topic_name}}
+    )
+    
+    if result.modified_count == 0:
+        return jsonify({'error': 'Space not found or you do not have permission to edit it'}), 404
+    
+    return jsonify({'success': True, 'new_topic_name': new_topic_name}), 200
+
+@app.route('/spaces')
+async def spaces():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return await render_template('space.html')
 
 async def get_participants(short_code):
     space = await public_spaces_collection.find_one({'short_code': short_code})

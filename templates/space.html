@@ -187,6 +187,20 @@
         footer a:hover {
             color: #8c6142;
         }
+
+        .edit-topic-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .edit-topic-btn:hover {
+            background: #45a049;
+        }
+        
     </style>
 </head>
 <body>
@@ -228,11 +242,13 @@
             container.innerHTML = spaces.map(space => `
                 <div class="space-card" onclick="navigateToSpace('${space.short_code}')">
                     <h3>Code: ${space.short_code}</h3>
+                    <h4>Topic: <span id="topic-${space.short_code}">${space.topic_name}</span></h4>
                     <div class="space-info">
                         <p>Created: ${new Date(space.created_at).toLocaleString()}</p>
                         <p>Notes: ${space.note_count}</p>
                     </div>
                     <div class="space-actions">
+                        <button class="edit-topic-btn" onclick="editTopicName('${space.short_code}', event)">Edit Topic</button>
                         <button class="delete-btn" onclick="deleteSpace('${space.short_code}', event)">Delete</button>
                     </div>
                 </div>
@@ -241,6 +257,31 @@
 
         function navigateToSpace(shortCode) {
             window.location.href = `/pub/${shortCode}`;
+        }
+
+        async function editTopicName(shortCode, event) {
+            event.stopPropagation();
+            const currentTopic = document.getElementById(`topic-${shortCode}`).textContent;
+            const newTopic = prompt("Enter new topic name:", currentTopic);
+            if (newTopic !== null && newTopic !== currentTopic) {
+                try {
+                    const response = await fetch(`/api/public_spaces/${shortCode}/edit_topic`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ topic_name: newTopic }),
+                    });
+                    if (response.ok) {
+                        const result = await response.json();
+                        document.getElementById(`topic-${shortCode}`).textContent = result.new_topic_name;
+                    } else {
+                        console.error('Failed to update topic name');
+                    }
+                } catch (error) {
+                    console.error('Error updating topic name:', error);
+                }
+            }
         }
 
         async function deleteSpace(shortCode, event) {
@@ -262,9 +303,16 @@
         }
 
         async function createNewSpace() {
+            const topic_name = prompt("Enter a topic name for the new space:", "New Space");
+            if (topic_name === null) return; // User cancelled the prompt
+            
             try {
                 const response = await fetch('/api/create_public_space', {
-                    method: 'POST'
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ topic_name }),
                 });
                 if (response.ok) {
                     const data = await response.json();
