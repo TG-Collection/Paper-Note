@@ -232,7 +232,7 @@
             const container = document.getElementById('spaces-container');
             container.innerHTML = spaces.map(space => `
                 <div class="space-card" onclick="navigateToSpace('${space.short_code}')">
-                    <h3>Space: ${space.short_code}</h3>
+                    <h3>Code: ${space.short_code}</h3>
                     <div class="space-info">
                         <p>Created: ${new Date(space.created_at).toLocaleString()}</p>
                         <p>Notes: ${space.note_count}</p>
