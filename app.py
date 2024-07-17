@@ -22,6 +22,38 @@ public_spaces_collection = db['public_spaces']
 def generate_short_code(length=6):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
+
+
+@app.route('/api/public_spaces', methods=['GET'])
+async def list_public_spaces():
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    username = session['username']
+    
+    # Find all public spaces created by the user
+    cursor = public_spaces_collection.find({'creator': username})
+    
+    # Convert the cursor to a list and serialize the ObjectId fields
+    public_spaces = []
+    async for space in cursor:
+        space['_id'] = str(space['_id'])
+        public_spaces.append({
+            'id': space['_id'],
+            'short_code': space['short_code'],
+            'created_at': space['created_at'].isoformat(),
+            'note_count': len(space['notes'])
+        })
+    
+    return jsonify(public_spaces), 200
+
+@app.route('/spaces')
+async def spaces():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return await render_template('space.html')
+
+
 @app.route('/api/create_public_space', methods=['POST'])
 async def create_public_space():
     if 'username' not in session:

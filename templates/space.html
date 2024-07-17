@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Tag - My Spaces</title>
+    <link rel="icon" type="image/png" href="/static/icon/logo.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400;600&display=swap');
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #d2b48c;
+            color: #3a3a3a;
+        }
+
+        .vintage-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feBlend mode="multiply" in="SourceGraphic" result="monoNoise"/><feColorMatrix in="monoNoise" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.5 0"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.1"/></svg>'), radial-gradient(circle, #d2b48c, #a67c52);
+            background-size: cover;
+            filter: url('#paper-texture');
+            z-index: -1;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background: rgba(255, 253, 240, 0.7);
+            border-radius: 15px;
+            box-shadow: 
+                0 4px 6px rgba(0, 0, 0, 0.1), 
+                0 0 20px rgba(0, 0, 0, 0.08) inset,
+                0 10px 20px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="paper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter><rect width="100" height="100" filter="url(%23paper)" opacity="0.1"/></svg>');
+            z-index: -1;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            color: #3a3a3a;
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .top-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(255, 253, 240, 0.8);
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #3a3a3a;
+            text-decoration: none;
+        }
+
+        .button {
+            padding: 10px 20px;
+            background: #a67c52;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background: #8c6142;
+            transform: scale(1.05);
+        }
+
+        .button:active {
+            transform: scale(0.98);
+        }
+
+        #logout-btn {
+            background: #d3bc8d;
+        }
+
+        #logout-btn:hover {
+            background: #c1aa7b;
+        }
+
+        .spaces-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .space-card {
+            background: #f4e6c9;
+            border: 1px solid #d3bc8d;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1), 0 0 5px rgba(0, 0, 0, 0.05) inset;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .space-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.2), 0 0 5px rgba(0, 0, 0, 0.05) inset;
+        }
+
+        .space-card h3 {
+            margin-top: 0;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .space-info {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .space-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .delete-btn {
+            background: #f44336;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #d32f2f;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        footer a {
+            color: #a67c52;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: #8c6142;
+        }
+    </style>
+</head>
+<body>
+    <div class="vintage-background"></div>
+    <div class="container">
+        <div class="top-navigation">
+            <a href="/" class="logo">Paper Tag</a>
+            <div>
+                <button id="create-space-btn" class="button">Create New Space</button>
+                <button id="logout-btn" class="button">Logout</button>
+            </div>
+        </div>
+        <h1>My Spaces</h1>
+        <div id="spaces-container" class="spaces-container">
+            <!-- Spaces will be dynamically inserted here -->
+        </div>
+        <footer>
+            <p>© 2024 | Made with ❤️ by <a href="https://t.me/meerazi" target="_blank">RAZi</a></p>
+        </footer>
+    </div>
+
+    <svg width="0" height="0">
+        <filter id="paper-texture">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5"/>
+            <feDisplacementMap in="SourceGraphic" scale="5"/>
+        </filter>
+    </svg>
+
+    <script>
+        async function fetchPublicSpaces() {
+            try {
+                const response = await fetch('/api/public_spaces');
+                if (response.ok) {
+                    const spaces = await response.json();
+                    displaySpaces(spaces);
+                } else {
+                    console.error('Failed to fetch public spaces');
+                }
+            } catch (error) {
+                console.error('Error fetching public spaces:', error);
+            }
+        }
+
+        function displaySpaces(spaces) {
+            const container = document.getElementById('spaces-container');
+            container.innerHTML = spaces.map(space => `
+                <div class="space-card" onclick="navigateToSpace('${space.short_code}')">
+                    <h3>Space: ${space.short_code}</h3>
+                    <div class="space-info">
+                        <p>Created: ${new Date(space.created_at).toLocaleString()}</p>
+                        <p>Notes: ${space.note_count}</p>
+                    </div>
+                    <div class="space-actions">
+                        <button class="delete-btn" onclick="deleteSpace('${space.id}', event)">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function navigateToSpace(shortCode) {
+            window.location.href = `/pub/${shortCode}`;
+        }
+
+        async function deleteSpace(spaceId, event) {
+            event.stopPropagation();
+            if (confirm('Are you sure you want to delete this space?')) {
+                try {
+                    const response = await fetch(`/api/public_spaces/${spaceId}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        fetchPublicSpaces();
+                    } else {
+                        console.error('Failed to delete space');
+                    }
+                } catch (error) {
+                    console.error('Error deleting space:', error);
+                }
+            }
+        }
+
+        async function createNewSpace() {
+            try {
+                const response = await fetch('/api/create_public_space', {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    window.location.href = data.public_link;
+                } else {
+                    console.error('Failed to create new space');
+                }
+            } catch (error) {
+                console.error('Error creating new space:', error);
+            }
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch('/api/public_logout', { method: 'POST' });
+                if (response.ok) {
+                    window.location.href = '/auth';
+                } else {
+                    console.error('Failed to logout');
+                }
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchPublicSpaces();
+            document.getElementById('create-space-btn').addEventListener('click', createNewSpace);
+            document.getElementById('logout-btn').addEventListener('click', logout);
+        });
+    </script>
+</body>
+</html>
