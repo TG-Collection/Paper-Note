@@ -164,7 +164,7 @@
             const password = document.getElementById('password').value;
 
             try {
-                const response = await fetch(isLoginForm ? '/api/login' : '/api/register', {
+                const response = await fetch('/api/public_login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -173,22 +173,20 @@
                 });
 
                 if (response.ok) {
-                    window.location.href = getNextUrl();
+                    const data = await response.json();
+                    if (data.success) {
+                        window.location.href = getNextUrl();
+                    } else {
+                        alert(data.error || 'Login failed');
+                    }
                 } else {
                     const error = await response.json();
-                    alert(error.error);
+                    alert(error.error || 'An error occurred during authentication. Please try again.');
                 }
             } catch (error) {
                 console.error('Error during authentication:', error);
                 alert('An error occurred during authentication. Please try again.');
-            }
-        });
-
-        switchLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            isLoginForm = !isLoginForm;
-            submitBtn.textContent = isLoginForm ? 'Login' : 'Register';
-            switchLink.textContent = isLoginForm ? "Don't have an account? Register" : "Already have an account? Login";
+            }   
         });
 
 

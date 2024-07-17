@@ -196,14 +196,22 @@ async def delete_public_space(short_code):
 
 @app.route('/api/public_login', methods=['POST'])
 async def public_login():
-    data = await request.json
-    username = data.get('username')
-    password = data.get('password')
-    user = await users_collection.find_one({'username': username})
-    if user and check_password_hash(user['password'], password):
-        session['username'] = username
-        return jsonify({'success': True, 'username': username}), 200
-    return jsonify({'error': 'Invalid username or password'}), 401
+    try:
+        data = await request.json
+        username = data.get('username')
+        password = data.get('password')
+        
+        if not username or not password:
+            return jsonify({'error': 'Username and password are required'}), 400
+        
+        user = await users_collection.find_one({'username': username})
+        if user and check_password_hash(user['password'], password):
+            session['username'] = username
+            return jsonify({'success': True, 'username': username}), 200
+        return jsonify({'error': 'Invalid username or password'}), 401
+    except Exception as e:
+        print(f"Login error: {str(e)}")  # Log the error
+        return jsonify({'error': 'An unexpected error occurred'}), 500
 
 @app.route('/api/public_logout', methods=['POST'])
 async def public_logout():
