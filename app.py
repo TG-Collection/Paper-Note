@@ -49,13 +49,12 @@ async def add_public_note(short_code):
     
     space = await public_spaces_collection.find_one({'short_code': short_code})
     if not space:
-        return jsonify({'error': 'Public space not found'}), 404
-    
+        return await render_template('error.html', error_code=404, error_message="Unauthorized", error_description="Public space not found"), 404
     data = await request.json
     content = data.get('content')
     
     if not content:
-        return jsonify({'error': 'Content is required'}), 400
+        return await render_template('error.html', error_code=400, error_message="Unauthorized", error_description="Content is required"), 400
     
     if len(content) > 400:
         return jsonify({'error': 'Note exceeds 400 character limit'}), 400
@@ -82,7 +81,7 @@ async def add_public_note(short_code):
 async def get_public_notes(short_code):
     space = await public_spaces_collection.find_one({'short_code': short_code})
     if not space:
-        return jsonify({'error': 'Public space not found'}), 404
+        return await render_template('error.html', error_code=404, error_message="Unauthorized", error_description="Public space not found"), 404
     serialized_notes = [{**note, '_id': str(note['_id'])} for note in space['notes']]
     return jsonify(serialized_notes)
 
