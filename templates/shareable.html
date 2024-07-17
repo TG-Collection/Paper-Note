@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Tag - Shared Note</title>
+    <link rel="icon" type="image/png" href="/static/icon/logo.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400;600&display=swap');
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #d2b48c;
+            color: #3a3a3a;
+        }
+
+        .vintage-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feBlend mode="multiply" in="SourceGraphic" result="monoNoise"/><feColorMatrix in="monoNoise" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.5 0"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.1"/></svg>'), radial-gradient(circle, #d2b48c, #a67c52);
+            background-size: cover;
+            filter: url('#paper-texture');
+            z-index: -1;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: rgba(255, 253, 240, 0.7);
+            border-radius: 15px;
+            box-shadow: 
+                0 4px 6px rgba(0, 0, 0, 0.1), 
+                0 0 20px rgba(0, 0, 0, 0.08) inset,
+                0 10px 20px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="paper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter><rect width="100" height="100" filter="url(%23paper)" opacity="0.1"/></svg>');
+            z-index: -1;
+        }
+
+        .flower-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('/static/icon/pattern.png');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.5;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            color: #3a3a3a;
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .shared-note {
+            background: #f4e6c9;
+            border: 1px solid #d3bc8d;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1), 0 0 5px rgba(0, 0, 0, 0.05) inset;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shared-note::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px double #d3bc8d;
+            background-color: rgba(244, 230, 201, 0.5);
+        }
+
+        .shared-note::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 50%);
+            pointer-events: none;
+        }
+
+        .note-timestamp {
+            font-size: 0.8em;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        .note-content {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .note-username {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .button {
+            padding: 10px 20px;
+            background: #a67c52;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background: #8c6142;
+        }
+
+        #logout-btn {
+            background: #d3bc8d;
+        }
+
+        #logout-btn:hover {
+            background: #c1aa7b;
+        }
+
+        .shareable-link {
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        footer a {
+            color: #a67c52;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: #8c6142;
+        }
+
+        .add-note-form {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        .add-note-form textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #d3bc8d;
+            border-radius: 5px;
+            resize: vertical;
+        }
+
+        .add-note-form button {
+            background: #a67c52;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .add-note-form button:hover {
+            background: #8c6142;
+        }
+
+        .top-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(255, 253, 240, 0.8);
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-navigation .button {
+            font-size: 0.9em;
+            padding: 8px 15px;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #3a3a3a;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="vintage-background"></div>
+    <div class="container">
+        <div class="flower-background"></div>
+        <div class="top-navigation">
+            <a href="/" class="logo">Paper Tag</a>
+            <div>
+                <button id="revoke-btn" class="button">Revoke Share</button>
+                <a href="/" class="button">Home</a>
+                <button id="logout-btn" class="button">Logout</button>
+            </div>
+        </div>
+        <h1>Shared Note</h1>
+        <div class="shared-note">
+            <div class="note-username" id="note-username"></div>
+            <div class="note-timestamp" id="note-timestamp"></div>
+            <div class="note-content" id="note-content"></div>
+        </div>
+        <div class="shareable-link" id="shareable-link"></div>
+        <div class="add-note-form">
+            <h2>Add New Public Note</h2>
+            <textarea id="new-note-content" placeholder="Enter your note here (max 400 characters)"></textarea>
+            <button id="add-note-btn">Add Public Note</button>
+        </div>
+        <footer>
+            <p>© 2024 | Made with ❤️ by <a href="https://t.me/meerazi" target="_blank">RAZi</a></p>
+        </footer>
+    </div>
+
+    <svg width="0" height="0">
+        <filter id="paper-texture">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5"/>
+            <feDisplacementMap in="SourceGraphic" scale="5"/>
+        </filter>
+    </svg>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const shortCode = urlParams.get('short_code');
+
+        async function fetchSharedNote() {
+            if (!shortCode) {
+                document.getElementById('note-content').textContent = 'Invalid or missing short code.';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/pub/${shortCode}`);
+                if (response.ok) {
+                    const note = await response.json();
+                    document.getElementById('note-username').textContent = `Shared by: ${note.username}`;
+                    document.getElementById('note-timestamp').textContent = note.timestamp;
+                    document.getElementById('note-content').textContent = note.content;
+                    document.getElementById('shareable-link').textContent = `Shareable Link: ${window.location.origin}/pub?short_code=${shortCode}`;
+                } else {
+                    document.getElementById('note-content').textContent = 'Note not found or has been deleted.';
+                }
+            } catch (error) {
+                console.error('Error fetching shared note:', error);
+                document.getElementById('note-content').textContent = 'An error occurred while fetching the note.';
+            }
+        }
+
+        document.getElementById('add-note-btn').addEventListener('click', async () => {
+            const content = document.getElementById('new-note-content').value.trim();
+            if (!content) {
+                alert('Please enter a note.');
+                return;
+            }
+            if (content.length > 400) {
+                alert('Note exceeds 400 character limit.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/public_notes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ content }),
+                });
+
+                if (response.ok) {
+                    const newNote = await response.json();
+                    alert(`Public note created successfully! Short code: ${newNote.short_code}`);
+                    document.getElementById('new-note-content').value = '';
+                    // You might want to update the display to show the new note
+                    // or redirect to the new note's page
+                } else {
+                    const error = await response.json();
+                    alert(`Failed to create note: ${error.error}`);
+                }
+            } catch (error) {
+                console.error('Error creating public note:', error);
+                alert('An error occurred while creating the public note.');
+            }
+        });
+
+        document.getElementById('revoke-btn').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to revoke sharing for this note?')) {
+                try {
+                    const response = await fetch(`/api/notes/${shortCode}/revoke_share`, { method: 'POST' });
+                    if (response.ok) {
+                        alert('Sharing has been revoked for this note.');
+                        window.location.href = '/';
+                    } else {
+                        alert('Failed to revoke sharing. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error revoking share:', error);
+                    alert('An error occurred while revoking share.');
+                }
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/logout', { method: 'POST' });
+                if (response.ok) {
+                    window.location.href = '/login';
+                } else {
+                    alert('Failed to logout. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error logging out:', error);
+                alert('An error occurred while logging out.');
+            }
+        });
+
+        fetchSharedNote();
+    </script>
+</body>
+</html>
