@@ -229,69 +229,6 @@
             background: #8c6142;
         }
 
-        .auth-form {
-            max-width: 300px;
-            margin: 0 auto;
-            background: rgba(255, 253, 240, 0.9);
-            padding: 30px 20px;
-            border-radius: 15px;
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
-            font-family: 'Helvetica Neue', sans-serif;
-            text-align: center;
-        }
-
-        .auth-form h2 {
-            margin-bottom: 20px;
-            font-size: 24px;
-            color: #a67c52;
-        }
-
-        .auth-form input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #d3bc8d;
-            border-radius: 5px;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .auth-form input:focus {
-            border-color: #a67c52;
-            box-shadow: 0 0 5px rgba(166, 124, 82, 0.5);
-            outline: none;
-        }
-
-        .auth-form button {
-            width: 100%;
-            padding: 12px;
-            background: #a67c52;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 18px;
-            transition: background 0.3s ease;
-        }
-
-        .auth-form button:hover {
-            background: #8c6142;
-        }
-
-        .auth-form a {
-            display: block;
-            margin-top: 10px;
-            color: #a67c52;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .auth-form a:hover {
-            color: #8c6142;
-        } 
-
-
         #logout-btn {
             position: absolute;
             font-size: 16px;
@@ -360,12 +297,10 @@
 </head>
 <body>
     <div class="vintage-background"></div>
+    <div class="vintage-background"></div>
     <div class="container">
         <div class="flower-background"></div>
         <h1>Paper Tag</h1>
-        <div id="auth-container">
-            <!-- Login form will be inserted here -->
-        </div>
         <div id="main-container" style="display: none;">
             <button id="logout-btn">Logout</button>
             <button id="create-public-space-btn">Public Space</button>
@@ -400,67 +335,6 @@
         const noteInput = document.getElementById('note-input');
         const logoutBtn = document.getElementById('logout-btn');
         const charCount = document.getElementById('char-count');
-
-        // Function to handle login form display
-        function showLoginForm() {
-            authContainer.innerHTML = `
-                <form class="auth-form" id="login-form">
-                    <h2>Login</h2>
-                    <input type="text" name="username" placeholder="Username" required>
-                    <input type="password" name="password" placeholder="Password" required>
-                    <button type="submit">Login</button>
-                    <p>Don't have an account? <a href="#" id="show-register">Register</a></p>
-                </form>
-            `;
-            document.getElementById('login-form').addEventListener('submit', handleLogin);
-            document.getElementById('show-register').addEventListener('click', showRegisterForm);
-        }
-
-        // Function to handle register form display
-        function showRegisterForm() {
-            authContainer.innerHTML = `
-                <form class="auth-form" id="register-form">
-                    <h2>Register</h2>
-                    <input type="text" name="username" placeholder="Username" required>
-                    <input type="password" name="password" placeholder="Password" required>
-                    <button type="submit">Register</button>
-                    <p>Already have an account? <a href="#" id="show-login">Login</a></p>
-                </form>
-            `;
-            document.getElementById('register-form').addEventListener('submit', handleRegister);
-            document.getElementById('show-login').addEventListener('click', showLoginForm);
-        }
-
-        async function handleLogin(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const response = await fetch('/login', {
-                method: 'POST',
-                body: formData
-            });
-            if (response.ok) {
-                authContainer.style.display = 'none';
-                mainContainer.style.display = 'block';
-                fetchNotes();
-            } else {
-                alert('Invalid username or password');
-            }
-        }
-
-        async function handleRegister(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const response = await fetch('/register', {
-                method: 'POST',
-                body: formData
-            });
-            if (response.ok) {
-                showLoginForm();
-                alert('Registration successful. Please login.');
-            } else {
-                alert('Registration failed. Please try again.');
-            }
-        }
 
         function createNoteElement(note) {
             const noteEl = document.createElement('div');
@@ -533,6 +407,10 @@
                 showLoginForm();
             }
         }
+
+        function handleAuthError() {
+            window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
+        }        
 
         noteInput.addEventListener('input', function() {
             const remainingChars = 400 - this.value.length;
@@ -652,36 +530,46 @@
             }
         });
 
-        // Modify the existing code that checks if the user is logged in
-        fetch('/api/notes')
-            .then(response => {
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('/api/check_login');
                 if (response.ok) {
-                    authContainer.style.display = 'none';
-                    mainContainer.style.display = 'block';
-                    fetchNotes().then(() => {
-                        animateNotes();
-                    });
-                    // Check if there's an existing public space link in local storage
-                    const savedPublicSpaceLink = localStorage.getItem('publicSpaceLink');
-                    if (savedPublicSpaceLink) {
-                        publicSpaceLink = savedPublicSpaceLink;
-                        goToPublicSpaceBtn.style.display = 'block';
+                    const data = await response.json();
+                    if (data.logged_in) {
+                        mainContainer.style.display = 'block';
+                        fetchNotes().then(() => {
+                            animateNotes();
+                        });
+                        // Check if there's an existing public space link in local storage
+                        const savedPublicSpaceLink = localStorage.getItem('publicSpaceLink');
+                        if (savedPublicSpaceLink) {
+                            publicSpaceLink = savedPublicSpaceLink;
+                            goToPublicSpaceBtn.style.display = 'block';
+                        }
+                    } else {
+                        handleAuthError();
                     }
                 } else {
-                    showLoginForm();
+                    handleAuthError();
                 }
-            });
+            } catch (error) {
+                console.error('Error checking login status:', error);
+                handleAuthError();
+            }
+        }
 
-        // Add this to save the public space link when logging out
         async function handleLogout() {
             if (publicSpaceLink) {
                 localStorage.setItem('publicSpaceLink', publicSpaceLink);
             }
             await fetch('/logout');
-            authContainer.style.display = 'block';
-            mainContainer.style.display = 'none';
-            showLoginForm();
+            window.location.href = '/login';
         }
+
+        logoutBtn.addEventListener('click', handleLogout);
+
+        // Call checkLoginStatus when the page loads
+        document.addEventListener('DOMContentLoaded', checkLoginStatus);
     </script>
 </body>
 </html>            
