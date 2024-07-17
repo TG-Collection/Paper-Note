@@ -25,7 +25,7 @@ def generate_short_code(length=6):
 @app.route('/api/create_public_space', methods=['POST'])
 async def create_public_space():
     if 'username' not in session:
-        return await render_template('error.html', error_code=401, error_message="Unauthorized", error_description="Sorry! You can access this page"), 401
+        return jsonify({'error': 'Unauthorized'}), 401
     
     short_code = generate_short_code()
     while await public_spaces_collection.find_one({'short_code': short_code}):
@@ -45,16 +45,17 @@ async def create_public_space():
 @app.route('/api/public_spaces/<short_code>/notes', methods=['POST'])
 async def add_public_note(short_code):
     if 'username' not in session:
-        return await render_template('error.html', error_code=401, error_message="Unauthorized", error_description="Sorry! You can access this page"), 401
+        return jsonify({'error': 'Unauthorized'}), 401
     
     space = await public_spaces_collection.find_one({'short_code': short_code})
     if not space:
-        return await render_template('error.html', error_code=404, error_message="Unauthorized", error_description="Public space not found"), 404
+        return jsonify({'error': 'Public space not found'}), 404
+    
     data = await request.json
     content = data.get('content')
     
     if not content:
-        return await render_template('error.html', error_code=400, error_message="Unauthorized", error_description="Content is required"), 400
+        return jsonify({'error': 'Content is required'}), 400
     
     if len(content) > 400:
         return jsonify({'error': 'Note exceeds 400 character limit'}), 400
@@ -81,14 +82,14 @@ async def add_public_note(short_code):
 async def get_public_notes(short_code):
     space = await public_spaces_collection.find_one({'short_code': short_code})
     if not space:
-        return await render_template('error.html', error_code=404, error_message="Unauthorized", error_description="Public space not found"), 404
+        return jsonify({'error': 'Public space not found'}), 404
     serialized_notes = [{**note, '_id': str(note['_id'])} for note in space['notes']]
     return jsonify(serialized_notes)
 
 @app.route('/api/public_spaces/<short_code>/notes/<note_id>/like', methods=['POST'])
 async def like_public_note(short_code, note_id):
     if 'username' not in session:
-        return await render_template('error.html', error_code=401, error_message="Unauthorized", error_description="Sorry! You can access this page"), 401
+        return jsonify({'error': 'Unauthorized'}), 401
     
     try:
         object_id = ObjectId(note_id)
@@ -108,7 +109,7 @@ async def like_public_note(short_code, note_id):
 @app.route('/api/public_spaces/<short_code>/notes/<note_id>/dislike', methods=['POST'])
 async def dislike_public_note(short_code, note_id):
     if 'username' not in session:
-        return await render_template('error.html', error_code=401, error_message="Unauthorized", error_description="Sorry! You can access this page"), 401
+        return jsonify({'error': 'Unauthorized'}), 401
     
     try:
         object_id = ObjectId(note_id)
@@ -128,7 +129,7 @@ async def dislike_public_note(short_code, note_id):
 @app.route('/api/public_spaces/<short_code>/notes/<note_id>/pin', methods=['POST'])
 async def pin_public_note(short_code, note_id):
     if 'username' not in session:
-        return await render_template('error.html', error_code=401, error_message="Unauthorized", error_description="Sorry! You can access this page"), 401
+        return jsonify({'error': 'Unauthorized'}), 401
     
     try:
         object_id = ObjectId(note_id)
@@ -164,7 +165,7 @@ async def pin_public_note(short_code, note_id):
 @app.route('/api/public_spaces/<short_code>/notes/<note_id>', methods=['DELETE'])
 async def delete_public_note(short_code, note_id):
     if 'username' not in session:
-        return await render_template('error.html', error_code=401, error_message="Unauthorized", error_description="Sorry! You can access this page"), 401
+        return jsonify({'error': 'Unauthorized'}), 401
     
     try:
         object_id = ObjectId(note_id)
@@ -184,7 +185,7 @@ async def delete_public_note(short_code, note_id):
 @app.route('/api/public_spaces/<short_code>', methods=['DELETE'])
 async def delete_public_space(short_code):
     if 'username' not in session:
-        return await render_template('error.html', error_code=401, error_message="Unauthorized", error_description="Sorry! You can access this page"), 401
+        return jsonify({'error': 'Unauthorized'}), 401
     
     result = await public_spaces_collection.delete_one({'short_code': short_code, 'creator': session['username']})
     
@@ -197,7 +198,7 @@ async def delete_public_space(short_code):
 async def public_space(short_code):
     space = await public_spaces_collection.find_one({'short_code': short_code})
     if not space:
-        return 'Public space not found', 404
+        return await render_template('error.html', error_code=404, error_message="Unauthorized acess", error_description="Public space not found"), 404
     return await render_template('share.html', space=space)
 
 @app.route('/')
@@ -252,7 +253,7 @@ async def status_handler():
 @app.route('/api/notes', methods=['POST'])
 async def add_note():
     if 'username' not in session:
-        return await render_template('error.html', error_code=401, error_message="Unauthorized", error_description="Sorry! You can access this page"), 401
+        return jsonify({'error': 'Unauthorized'}), 401
     data = await request.json
     content = data['content']
     
@@ -277,7 +278,7 @@ async def add_note():
 @app.route('/api/notes', methods=['GET'])
 async def get_notes():
     if 'username' not in session:
-        return await render_template('error.html', error_code=401, error_message="Unauthorized", error_description="Sorry! You can access this page"), 401
+        return jsonify({'error': 'Unauthorized'}), 401
     search_query = request.args.get('search', '')
     query = {
         "username": session['username'],
@@ -289,7 +290,7 @@ async def get_notes():
 @app.route('/api/notes/<note_id>/pin', methods=['POST'])
 async def pin_note(note_id):
     if 'username' not in session:
-        return await render_template('error.html', error_code=401, error_message="Unauthorized", error_description="Sorry! You can access this page"), 401
+        return jsonify({'error': 'Unauthorized'}), 401
     
     # Unpin all notes
     await notes_collection.update_many(
@@ -308,7 +309,7 @@ async def pin_note(note_id):
 @app.route('/api/notes/<note_id>', methods=['PUT'])
 async def update_note(note_id):
     if 'username' not in session:
-        return await render_template('error.html', error_code=401, error_message="Unauthorized", error_description="Sorry! You can access this page"), 401
+        return jsonify({'error': 'Unauthorized'}), 401
     data = await request.json
     await notes_collection.update_one({'_id': ObjectId(note_id), 'username': session['username']}, {'$set': {'content': data['content']}})
     return '', 204
@@ -316,21 +317,21 @@ async def update_note(note_id):
 @app.route('/api/notes/<note_id>', methods=['DELETE'])
 async def delete_note(note_id):
     if 'username' not in session:
-        return await render_template('error.html', error_code=401, error_message="Unauthorized", error_description="Sorry! You can access this page"), 401
+        return jsonify({'error': 'Unauthorized'}), 401
     await notes_collection.delete_one({'_id': ObjectId(note_id), 'username': session['username']})
     return '', 204
 
 @app.route('/api/notes/<note_id>/like', methods=['POST'])
 async def like_note(note_id):
     if 'username' not in session:
-        return await render_template('error.html', error_code=401, error_message="Unauthorized", error_description="Sorry! You can access this page"), 401
+        return jsonify({'error': 'Unauthorized'}), 401
     await notes_collection.update_one({'_id': ObjectId(note_id), 'username': session['username']}, {'$inc': {'likes': 1}})
     return '', 204
 
 @app.route('/api/notes/<note_id>/dislike', methods=['POST'])
 async def dislike_note(note_id):
     if 'username' not in session:
-        return await render_template('error.html', error_code=401, error_message="Unauthorized", error_description="Sorry! You can access this page"), 401
+        return jsonify({'error': 'Unauthorized'}), 401
     await notes_collection.update_one({'_id': ObjectId(note_id), 'username': session['username']}, {'$inc': {'dislikes': 1}})
     return '', 204
 
