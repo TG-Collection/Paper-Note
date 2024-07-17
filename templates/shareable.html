@@ -399,7 +399,7 @@
 
         async function deleteNote(noteId) {
             if (!noteId || noteId === 'undefined') {
-                 alert('Invalid note ID. Cannot delete note.');
+                alert('Invalid note ID. Cannot delete note.');
                 return;
             }
             if (confirm('Are you sure you want to delete this note?')) {
@@ -568,9 +568,11 @@
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
             try {
-                const response = await fetch('/logout', { method: 'GET' });
+                const response = await fetch('/api/logout', {
+                    method: 'POST',
+                });
                 if (response.ok) {
-                    window.location.href = '/login';
+                    window.location.href = '/'; // Redirect to home page after logout
                 } else {
                     alert('Failed to logout. Please try again.');
                 }
@@ -580,7 +582,7 @@
             }
         });
 
-        fetchSharedSpace();
+        fetchSharedSpace(); // Initial fetch of shared space data
     </script>
 </body>
 </html>
