@@ -16,8 +16,8 @@ To get started with Paper Tag, follow these simple steps:
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/MeeRzi/paper-tag.git
-   cd paper-tag
+   git clone https://github.com/MeeRzi/Paper-Tag.git
+   cd Paper-Tag
    pip3 install -r requirements.txt
    python3 app.py
    ```  
