@@ -140,6 +140,27 @@ async def public_space(short_code):
         return 'Public space not found', 404
     return await render_template('shareable.html', space=space)
 
+@app.route('/api/public_spaces/<short_code>/notes/<note_id>/pin', methods=['POST'])
+async def pin_public_note(short_code, note_id):
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    # First, unpin all notes in the space
+    await public_spaces_collection.update_one(
+        {'short_code': short_code},
+        {'$set': {'notes.$[].pinned': False}}
+    )
+    
+    # Then, pin the selected note
+    result = await public_spaces_collection.update_one(
+        {'short_code': short_code, 'notes._id': ObjectId(note_id), 'notes.username': session['username']},
+        {'$set': {'notes.$.pinned': True}}
+    )
+    
+    if result.modified_count == 0:
+        return jsonify({'error': 'Note not found or you do not have permission to pin it'}), 404
+    
+    return '', 204
 
 @app.route('/')
 async def index():
