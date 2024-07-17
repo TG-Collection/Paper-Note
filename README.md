@@ -20,7 +20,7 @@ To get started with Paper Tag, follow these simple steps:
    cd paper-tag
    pip3 install -r requirements.txt
    python3 app.py
-   ```
+   ```  
 ## Contributing
 
 We welcome contributions to Paper Tag! If you have suggestions for improvements or encounter any issues, please feel free to open an issue or submit a pull request.
@@ -35,4 +35,3 @@ Paper Tag is released under the MIT License. See the LICENSE file for more detai
 - **Quart:** For its powerful and easy-to-use asynchronous web framework capabilities.
 
 Thank you for choosing Paper Tag for your note-taking needs. Enjoy the blend of vintage aesthetics and modern technology as you capture your thoughts and ideas.
-```
