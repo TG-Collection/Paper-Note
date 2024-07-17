@@ -318,10 +318,10 @@
                 const response = await fetch('/api/check_login');
                 if (response.ok) {
                     const data = await response.json();
-                    isLoggedIn = true;
+                    isLoggedIn = data.logged_in;
                     currentUsername = data.username;
                 } else {
-                     isLoggedIn = false;
+                    isLoggedIn = false;
                     currentUsername = '';
                 }
             } catch (error) {
@@ -336,27 +336,16 @@
             const contentArea = document.getElementById('content-area');
 
             if (!isLoggedIn) {
+                const currentUrl = encodeURIComponent(window.location.pathname);
                 contentArea.innerHTML = `
                     <div class="login-prompt">
                         <p>Please log in to view and interact with this shared space.</p>
-                        <a href="/login?redirect=/pub/${shortCode}" class="button">Login</a>
+                        <a href="/login?next=${currentUrl}" class="button">Login</a>
                     </div>
                 `;
                 return;
             }
 
-            try {
-                const response = await fetch(`/api/public_spaces/${shortCode}/notes`);
-                if (response.ok) {
-                    const notes = await response.json();
-                    displayNotes(notes);
-                } else {
-                    contentArea.textContent = 'Shared space not found or has been deleted.';
-                }
-            } catch (error) {
-                console.error('Error fetching shared space:', error);
-                contentArea.textContent = 'An error occurred while fetching the shared space.';
-            }
         }
 
         function displayNotes(notes) {

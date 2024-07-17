@@ -156,9 +156,16 @@ async def login():
         user = await users_collection.find_one({'username': username})
         if user and check_password_hash(user['password'], password):
             session['username'] = username
-            return redirect(url_for('index'))
+            next_url = request.args.get('next', url_for('index'))
+            return redirect(next_url)
         return 'Invalid username or password', 401
     return await render_template('login.html')
+
+@app.route('/api/check_login')
+async def check_login():
+    if 'username' in session:
+        return jsonify({'logged_in': True, 'username': session['username']})
+    return jsonify({'logged_in': False}), 401
 
 @app.route('/register', methods=['GET', 'POST'])
 async def register():
