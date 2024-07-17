@@ -1,4 +1,4 @@
-from quart import Quart, request, jsonify, render_template, session, redirect, url_for
+from quart import Quart, request, jsonify, render_template, session, redirect, url_for, abort
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 import os
@@ -334,6 +334,18 @@ async def dislike_note(note_id):
         return jsonify({'error': 'Unauthorized'}), 401
     await notes_collection.update_one({'_id': ObjectId(note_id), 'username': session['username']}, {'$inc': {'dislikes': 1}})
     return '', 204
+
+@app.errorhandler(404)
+async def not_found_error(error):
+    return await render_template('error.html', error_code=404, error_message="Page Not Found", error_description="Sorry, the page you are looking for does not exist. It might have been moved or deleted."), 404
+
+@app.errorhandler(500)
+async def internal_error(error):
+    return await render_template('error.html', error_code=500, error_message="Internal Server Error", error_description="The server encountered an internal error and was unable to complete your request."), 500
+
+@app.errorhandler(Exception)
+async def unhandled_exception(e):
+    return await render_template('error.html', error_code=500, error_message="Unexpected Error", error_description=f"An unexpected error occurred: {str(e)}"), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 10000)), debug=True)
