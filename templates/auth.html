@@ -164,7 +164,7 @@
             const password = document.getElementById('password').value;
 
             try {
-                const response = await fetch('/api/public_login', {
+                const response = await fetch(isLoginForm ? '/api/public_login' : '/api/public_register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -177,35 +177,24 @@
                     if (data.success) {
                         window.location.href = getNextUrl();
                     } else {
-                        alert(data.error || 'Login failed');
+                        alert(data.error || (isLoginForm ? 'Login failed' : 'Registration failed'));
                     }
                 } else {
                     const error = await response.json();
-                    alert(error.error || 'An error occurred during authentication. Please try again.');
+                    alert(error.error || 'An error occurred. Please try again.');
                 }
             } catch (error) {
                 console.error('Error during authentication:', error);
-                alert('An error occurred during authentication. Please try again.');
-            }   
+                alert('An error occurred. Please try again.');
+            }
         });
 
-
-        document.getElementById('logout-btn').addEventListener('click', async () => {
-            try {
-                const response = await fetch('/api/public_logout', {
-                    method: 'POST',
-                });
-                if (response.ok) {
-                    window.location.href = '/auth'; // Redirect to auth page after logout
-                } else {
-                    alert('Failed to logout. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error logging out:', error);
-                alert('An error occurred while logging out.');
-            }
-        });        
-
+        switchLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            isLoginForm = !isLoginForm;
+            submitBtn.textContent = isLoginForm ? 'Login' : 'Register';
+            switchLink.textContent = isLoginForm ? "Don't have an account? Register" : "Already have an account? Login";
+        });
         checkLoginStatus();
     </script>
 </body>

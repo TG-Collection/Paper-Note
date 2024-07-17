@@ -218,6 +218,25 @@ async def public_logout():
     session.pop('username', None)
     return jsonify({'success': True}), 200
 
+@app.route('/api/public_register', methods=['POST'])
+async def api_register():
+    data = await request.json
+    username = data.get('username')
+    password = data.get('password')
+    
+    if not username or not password:
+        return jsonify({'error': 'Username and password are required'}), 400
+    
+    existing_user = await users_collection.find_one({'username': username})
+    if existing_user:
+        return jsonify({'error': 'Username already exists'}), 400
+    
+    hashed_password = generate_password_hash(password)
+    await users_collection.insert_one({'username': username, 'password': hashed_password})
+    
+    session['username'] = username
+    return jsonify({'success': True, 'username': username}), 201
+
 @app.route('/pub/<short_code>')
 async def public_space(short_code):
     space = await public_spaces_collection.find_one({'short_code': short_code})
