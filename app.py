@@ -60,7 +60,7 @@ async def create_public_space():
     if 'username' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
     
-    short_code = generate_short_code()
+    short_code = generate_short_code()  
     while await public_spaces_collection.find_one({'short_code': short_code}):
         short_code = generate_short_code()
     
@@ -68,12 +68,30 @@ async def create_public_space():
         'short_code': short_code,
         'creator': session['username'],
         'created_at': datetime.now(pytz.timezone('Asia/Kolkata')),
+        'last_updated': datetime.now(pytz.timezone('Asia/Kolkata')),
         'notes': []
     }
     
     result = await public_spaces_collection.insert_one(new_space)
     
     return jsonify({'public_link': f'/pub/{short_code}', 'space_id': str(result.inserted_id)}), 201
+
+async def get_participants(short_code):
+    space = await public_spaces_collection.find_one({'short_code': short_code})
+    if not space:
+        return []
+    # Initialize an empty list to hold usernames
+    usernames = []
+    # Check if 'notes' key exists and is a list
+    if 'notes' in space and isinstance(space['notes'], list):
+        # Iterate over each note in the 'notes' list
+        for note in space['notes']:
+            # Check if 'username' key exists in the note
+            if 'username' in note:
+                # Add the username to the usernames list
+                usernames.append(note['username'])
+    return usernames
+
 
 @app.route('/api/public_spaces/<short_code>/notes', methods=['POST'])
 async def add_public_note(short_code):
