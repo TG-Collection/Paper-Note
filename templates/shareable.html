@@ -296,6 +296,18 @@
         .pinned {
             background-color: #45a049;
         }
+        .delete-space-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .delete-space-btn:hover {
+            background-color: #d32f2f;
+        }
     </style>
 </head>
 <body>
@@ -405,9 +417,11 @@
                         </div>
                     `).join('')}
                 </div>
+                <button id="delete-space-btn" class="delete-space-btn">Delete Shared Space</button>
             `;
 
             document.getElementById('add-note-btn').addEventListener('click', addNote);
+            document.getElementById('delete-space-btn').addEventListener('click', deleteSharedSpace);
         }
 
         async function addNote() {
@@ -460,7 +474,8 @@
                 if (response.ok) {
                     await fetchSharedSpace(); // Refresh the notes
                 } else {
-                    alert(`Failed to ${action} note. Please try again.`);
+                    const error = await response.json();
+                    alert(`Failed to ${action} note: ${error.error}`);
                 }
             } catch (error) {
                 console.error(`Error ${action}ing note:`, error);
@@ -478,7 +493,8 @@
                     if (response.ok) {
                         await fetchSharedSpace(); // Refresh the notes
                     } else {
-                        alert('Failed to delete note. Please try again.');
+                        const error = await response.json();
+                        alert(`Failed to delete note: ${error.error}`);
                     }
                 } catch (error) {
                     console.error('Error deleting note:', error);
@@ -496,11 +512,33 @@
                 if (response.ok) {
                     await fetchSharedSpace(); // Refresh the notes
                 } else {
-                    alert('Failed to pin/unpin note. Please try again.');
+                    const error = await response.json();
+                    alert(`Failed to pin/unpin note: ${error.error}`);
                 }
             } catch (error) {
                 console.error('Error pinning/unpinning note:', error);
                 alert('An error occurred while pinning/unpinning the note.');
+            }
+        }
+
+        async function deleteSharedSpace() {
+            if (confirm('Are you sure you want to delete this shared space? This action cannot be undone.')) {
+                try {
+                    const response = await fetch(`/api/public_spaces/${shortCode}`, {
+                        method: 'DELETE',
+                    });
+
+                    if (response.ok) {
+                        alert('Shared space deleted successfully.');
+                        window.location.href = '/'; // Redirect to home page
+                    } else {
+                        const error = await response.json();
+                        alert(`Failed to delete shared space: ${error.error}`);
+                    }
+                } catch (error) {
+                    console.error('Error deleting shared space:', error);
+                    alert('An error occurred while deleting the shared space.');
+                }
             }
         }
 
