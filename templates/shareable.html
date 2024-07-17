@@ -389,6 +389,52 @@
             }
         }
 
+        async function deleteNote(noteId) {
+            if (!noteId || noteId === 'undefined') {
+                alert('Invalid note ID. Cannot delete note.');
+                return;
+            }
+            if (confirm('Are you sure you want to delete this note?')) {
+                try {
+                    const response = await fetch(`/api/public_spaces/${shortCode}/notes/${noteId}`, {
+                        method: 'DELETE',
+                    });
+
+                    if (response.ok) {
+                        await fetchSharedSpace(); // Refresh the notes
+                    } else {
+                        const error = await response.json();
+                        alert(`Failed to delete note: ${error.error}`);
+                    }
+                } catch (error) {
+                    console.error('Error deleting note:', error);
+                    alert('An error occurred while deleting the note.');
+                }
+            }
+        }
+
+        async function pinNote(noteId) {
+            if (!noteId || noteId === 'undefined') {
+                alert('Invalid note ID. Cannot pin/unpin note.');
+                return;
+            }
+            try {
+                const response = await fetch(`/api/public_spaces/${shortCode}/notes/${noteId}/pin`, {
+                    method: 'POST',
+                });
+
+                if (response.ok) {
+                    await fetchSharedSpace(); // Refresh the notes
+                } else {
+                    const error = await response.json();
+                    alert(`Failed to pin/unpin note: ${error.error}`);
+                }
+            } catch (error) {
+                console.error('Error pinning/unpinning note:', error);
+                alert('An error occurred while pinning/unpinning the note.');
+            }
+        }
+
         function displayNotes(notes) {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
@@ -403,7 +449,7 @@
                         <div class="note">
                             <div class="note-username">${note.username}</div>
                             <div class="note-timestamp">${note.timestamp}</div>
-                            <div class="note-content">${note.content}</div>
+                             <div class="note-content">${note.content}</div>
                             <div class="note-actions">
                                 <button onclick="likeNote('${note._id}')">Like (${note.likes})</button>
                                 <button onclick="dislikeNote('${note._id}')">Dislike (${note.dislikes})</button>
@@ -423,7 +469,7 @@
             document.getElementById('add-note-btn').addEventListener('click', addNote);
             document.getElementById('delete-space-btn').addEventListener('click', deleteSharedSpace);
         }
-
+        
         async function addNote() {
             const content = document.getElementById('new-note-content').value.trim();
             if (!content) {
@@ -480,44 +526,6 @@
             } catch (error) {
                 console.error(`Error ${action}ing note:`, error);
                 alert(`An error occurred while ${action}ing the note.`);
-            }
-        }
-
-        async function deleteNote(noteId) {
-            if (confirm('Are you sure you want to delete this note?')) {
-                try {
-                    const response = await fetch(`/api/public_spaces/${shortCode}/notes/${noteId}`, {
-                        method: 'DELETE',
-                    });
-
-                    if (response.ok) {
-                        await fetchSharedSpace(); // Refresh the notes
-                    } else {
-                        const error = await response.json();
-                        alert(`Failed to delete note: ${error.error}`);
-                    }
-                } catch (error) {
-                    console.error('Error deleting note:', error);
-                    alert('An error occurred while deleting the note.');
-                }
-            }
-        }
-
-        async function pinNote(noteId) {
-            try {
-                const response = await fetch(`/api/public_spaces/${shortCode}/notes/${noteId}/pin`, {
-                    method: 'POST',
-                });
-
-                if (response.ok) {
-                    await fetchSharedSpace(); // Refresh the notes
-                } else {
-                    const error = await response.json();
-                    alert(`Failed to pin/unpin note: ${error.error}`);
-                }
-            } catch (error) {
-                console.error('Error pinning/unpinning note:', error);
-                alert('An error occurred while pinning/unpinning the note.');
             }
         }
 

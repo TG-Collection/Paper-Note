@@ -7,6 +7,7 @@ from datetime import datetime
 import pytz
 import random
 import string
+from bson.errors import InvalidId
 
 app = Quart(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "your_secret_key")  # Make sure to set this in production
@@ -123,9 +124,14 @@ async def delete_public_note(short_code, note_id):
     if 'username' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
     
+    try:
+        object_id = ObjectId(note_id)
+    except InvalidId:
+        return jsonify({'error': 'Invalid note ID'}), 400
+    
     result = await public_spaces_collection.update_one(
         {'short_code': short_code},
-        {'$pull': {'notes': {'_id': ObjectId(note_id), 'username': session['username']}}}
+        {'$pull': {'notes': {'_id': object_id, 'username': session['username']}}}
     )
     
     if result.modified_count == 0:
@@ -138,6 +144,11 @@ async def pin_public_note(short_code, note_id):
     if 'username' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
     
+    try:
+        object_id = ObjectId(note_id)
+    except InvalidId:
+        return jsonify({'error': 'Invalid note ID'}), 400
+    
     # First, unpin all notes in the space
     await public_spaces_collection.update_one(
         {'short_code': short_code},
@@ -146,7 +157,7 @@ async def pin_public_note(short_code, note_id):
     
     # Then, pin the selected note
     result = await public_spaces_collection.update_one(
-        {'short_code': short_code, 'notes': {'$elemMatch': {'_id': ObjectId(note_id), 'username': session['username']}}},
+        {'short_code': short_code, 'notes': {'$elemMatch': {'_id': object_id, 'username': session['username']}}},
         {'$set': {'notes.$.pinned': True}}
     )
     
