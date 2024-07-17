@@ -16,86 +16,39 @@ client = AsyncIOMotorClient(os.environ.get("MONGODB_URL"))
 db = client.floating_notes
 notes_collection = db[os.environ.get('NOTES_COLLECTION_NAME', 'notes')]
 users_collection = db['users']
-public_links_collection = db['public_links']
-
+public_spaces_collection = db['public_spaces']
 
 def generate_short_code(length=6):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
-@app.route('/api/notes/<note_id>/create_public_link', methods=['POST'])
-async def create_public_link(note_id):
+@app.route('/api/create_public_space', methods=['POST'])
+async def create_public_space():
     if 'username' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
-    
-    note = await notes_collection.find_one({'_id': ObjectId(note_id), 'username': session['username']})
-    if not note:
-        return jsonify({'error': 'Note not found'}), 404
     
     short_code = generate_short_code()
-    while await public_links_collection.find_one({'short_code': short_code}):
+    while await public_spaces_collection.find_one({'short_code': short_code}):
         short_code = generate_short_code()
     
-    public_note = {
+    new_space = {
         'short_code': short_code,
-        'content': note['content'],
-        'username': session['username'],
-        'timestamp': note['timestamp'],
-        'original_note_id': str(note['_id'])  # Store the original note ID
+        'creator': session['username'],
+        'created_at': datetime.now(pytz.timezone('Asia/Kolkata')),
+        'notes': []
     }
     
-    result = await public_links_collection.insert_one(public_note)
+    result = await public_spaces_collection.insert_one(new_space)
     
-    return jsonify({'public_link': f'/pub/{short_code}', 'public_note_id': str(result.inserted_id)}), 201
+    return jsonify({'public_link': f'/pub/{short_code}', 'space_id': str(result.inserted_id)}), 201
 
-@app.route('/api/notes/<note_id>/delete_public_link', methods=['POST'])
-async def delete_public_link(note_id):
+@app.route('/api/public_spaces/<short_code>/notes', methods=['POST'])
+async def add_public_note(short_code):
     if 'username' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
     
-    note = await notes_collection.find_one({'_id': ObjectId(note_id), 'username': session['username']})
-    if not note:
-        return jsonify({'error': 'Note not found'}), 404
-    
-    result = await public_links_collection.delete_many({'username': session['username'], 'original_note_id': str(note['_id'])})
-    
-    if result.deleted_count == 0:
-        return jsonify({'error': 'Public link not found'}), 404
-    
-    return jsonify({'message': f'Deleted {result.deleted_count} public link(s)'}), 200
-
-@app.route('/api/public_notes/<public_note_id>', methods=['DELETE'])
-async def delete_specific_public_note(public_note_id):
-    if 'username' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    result = await public_links_collection.delete_one({
-        '_id': ObjectId(public_note_id),
-        'username': session['username']
-    })
-    
-    if result.deleted_count == 0:
-        return jsonify({'error': 'Public note not found or you do not have permission to delete it'}), 404
-    
-    return jsonify({'message': 'Public note deleted successfully'}), 200
-
-@app.route('/api/public_notes', methods=['GET'])
-async def get_public_notes():
-    if 'username' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    public_notes = await public_links_collection.find({'username': session['username']}).to_list(length=None)
-    return jsonify([{
-        'id': str(note['_id']),
-        'short_code': note['short_code'],
-        'content': note['content'],
-        'timestamp': note['timestamp'],
-        'public_link': f'/pub/{note["short_code"]}'
-    } for note in public_notes])
-
-@app.route('/api/public_notes', methods=['POST'])
-async def add_public_note():
-    if 'username' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
+    space = await public_spaces_collection.find_one({'short_code': short_code})
+    if not space:
+        return jsonify({'error': 'Public space not found'}), 404
     
     data = await request.json
     content = data.get('content')
@@ -103,19 +56,13 @@ async def add_public_note():
     if not content:
         return jsonify({'error': 'Content is required'}), 400
     
-    # Check word limit (approximately 400 characters)
     if len(content) > 400:
         return jsonify({'error': 'Note exceeds 400 character limit'}), 400
     
     kolkata_tz = pytz.timezone('Asia/Kolkata')
     current_time = datetime.now(kolkata_tz)
     
-    short_code = generate_short_code()
-    while await public_links_collection.find_one({'short_code': short_code}):
-        short_code = generate_short_code()
-    
-    public_note = {
-        'short_code': short_code,
+    new_note = {
         'content': content,
         'username': session['username'],
         'timestamp': current_time.strftime('%Y-%m-%d %H:%M:%S %Z'),
@@ -123,25 +70,75 @@ async def add_public_note():
         'dislikes': 0
     }
     
-    result = await public_links_collection.insert_one(public_note)
-    public_note['_id'] = str(result.inserted_id)
-    public_note['public_link'] = f'/pub/{short_code}'
+    result = await public_spaces_collection.update_one(
+        {'short_code': short_code},
+        {'$push': {'notes': new_note}}
+    )
     
-    return jsonify(public_note), 201
+    if result.modified_count == 0:
+        return jsonify({'error': 'Failed to add note'}), 500
+    
+    return jsonify(new_note), 201
+
+@app.route('/api/public_spaces/<short_code>/notes', methods=['GET'])
+async def get_public_notes(short_code):
+    space = await public_spaces_collection.find_one({'short_code': short_code})
+    if not space:
+        return jsonify({'error': 'Public space not found'}), 404
+    
+    return jsonify(space['notes'])
+
+@app.route('/api/public_spaces/<short_code>/notes/<note_id>', methods=['DELETE'])
+async def delete_public_note(short_code, note_id):
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    result = await public_spaces_collection.update_one(
+        {'short_code': short_code, 'notes.username': session['username']},
+        {'$pull': {'notes': {'_id': ObjectId(note_id)}}}
+    )
+    
+    if result.modified_count == 0:
+        return jsonify({'error': 'Note not found or you do not have permission to delete it'}), 404
+    
+    return '', 204
+
+@app.route('/api/public_spaces/<short_code>/notes/<note_id>/like', methods=['POST'])
+async def like_public_note(short_code, note_id):
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    result = await public_spaces_collection.update_one(
+        {'short_code': short_code, 'notes._id': ObjectId(note_id)},
+        {'$inc': {'notes.$.likes': 1}}
+    )
+    
+    if result.modified_count == 0:
+        return jsonify({'error': 'Note not found'}), 404
+    
+    return '', 204
+
+@app.route('/api/public_spaces/<short_code>/notes/<note_id>/dislike', methods=['POST'])
+async def dislike_public_note(short_code, note_id):
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    result = await public_spaces_collection.update_one(
+        {'short_code': short_code, 'notes._id': ObjectId(note_id)},
+        {'$inc': {'notes.$.dislikes': 1}}
+    )
+    
+    if result.modified_count == 0:
+        return jsonify({'error': 'Note not found'}), 404
+    
+    return '', 204
 
 @app.route('/pub/<short_code>')
-async def public_note(short_code):
-    public_note = await public_links_collection.find_one({'short_code': short_code})
-    if not public_note:
-        return 'Note not found', 404
-    return await render_template('shareable.html', note=public_note)
-
-@app.route('/pub')
-async def pub_redirect():
-    short_code = request.args.get('short_code')
-    if not short_code:
-        return 'Invalid link', 400
-    return redirect(url_for('public_note', short_code=short_code))
+async def public_space(short_code):
+    space = await public_spaces_collection.find_one({'short_code': short_code})
+    if not space:
+        return 'Public space not found', 404
+    return await render_template('shareable.html', space=space)
 
 
 @app.route('/')

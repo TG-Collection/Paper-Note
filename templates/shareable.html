@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paper Tag - Shared Note</title>
+    <title>Paper Tag - Shared Space</title>
     <link rel="icon" type="image/png" href="/static/icon/logo.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400;600&display=swap');
@@ -238,6 +238,47 @@
             color: #3a3a3a;
             text-decoration: none;
         }
+
+        .login-prompt {
+            background: rgba(255, 253, 240, 0.9);
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .notes-container {
+            margin-top: 20px;
+        }
+
+        .note {
+            background: #f4e6c9;
+            border: 1px solid #d3bc8d;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1), 0 0 5px rgba(0, 0, 0, 0.05) inset;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .note-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .note-actions button {
+            background: #a67c52;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .note-actions button:hover {
+            background: #8c6142;
+        }
     </style>
 </head>
 <body>
@@ -247,22 +288,13 @@
         <div class="top-navigation">
             <a href="/" class="logo">Paper Tag</a>
             <div>
-                <button id="revoke-btn" class="button">Revoke Share</button>
                 <a href="/" class="button">Home</a>
                 <button id="logout-btn" class="button">Logout</button>
             </div>
         </div>
-        <h1>Shared Note</h1>
-        <div class="shared-note">
-            <div class="note-username" id="note-username"></div>
-            <div class="note-timestamp" id="note-timestamp"></div>
-            <div class="note-content" id="note-content"></div>
-        </div>
-        <div class="shareable-link" id="shareable-link"></div>
-        <div class="add-note-form">
-            <h2>Add New Public Note</h2>
-            <textarea id="new-note-content" placeholder="Enter your note here (max 400 characters)"></textarea>
-            <button id="add-note-btn">Add Public Note</button>
+        <h1>Shared Space</h1>
+        <div id="content-area">
+            <!-- Content will be dynamically inserted here -->
         </div>
         <footer>
             <p>© 2024 | Made with ❤️ by <a href="https://t.me/meerazi" target="_blank">RAZi</a></p>
@@ -277,33 +309,85 @@
     </svg>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const shortCode = urlParams.get('short_code');
+        const shortCode = window.location.pathname.split('/').pop();
+        let isLoggedIn = false;
+        let currentUsername = '';
 
-        async function fetchSharedNote() {
-            if (!shortCode) {
-                document.getElementById('note-content').textContent = 'Invalid or missing short code.';
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('/api/check_login');
+                if (response.ok) {
+                    const data = await response.json();
+                    isLoggedIn = true;
+                    currentUsername = data.username;
+                } else {
+                     isLoggedIn = false;
+                    currentUsername = '';
+                }
+            } catch (error) {
+                console.error('Error checking login status:', error);
+                isLoggedIn = false;
+                currentUsername = '';
+            }
+        }
+
+        async function fetchSharedSpace() {
+            await checkLoginStatus();
+            const contentArea = document.getElementById('content-area');
+
+            if (!isLoggedIn) {
+                contentArea.innerHTML = `
+                    <div class="login-prompt">
+                        <p>Please log in to view and interact with this shared space.</p>
+                        <a href="/login?redirect=/pub/${shortCode}" class="button">Login</a>
+                    </div>
+                `;
                 return;
             }
 
             try {
-                const response = await fetch(`/pub/${shortCode}`);
+                const response = await fetch(`/api/public_spaces/${shortCode}/notes`);
                 if (response.ok) {
-                    const note = await response.json();
-                    document.getElementById('note-username').textContent = `Shared by: ${note.username}`;
-                    document.getElementById('note-timestamp').textContent = note.timestamp;
-                    document.getElementById('note-content').textContent = note.content;
-                    document.getElementById('shareable-link').textContent = `Shareable Link: ${window.location.origin}/pub?short_code=${shortCode}`;
+                    const notes = await response.json();
+                    displayNotes(notes);
                 } else {
-                    document.getElementById('note-content').textContent = 'Note not found or has been deleted.';
+                    contentArea.textContent = 'Shared space not found or has been deleted.';
                 }
             } catch (error) {
-                console.error('Error fetching shared note:', error);
-                document.getElementById('note-content').textContent = 'An error occurred while fetching the note.';
+                console.error('Error fetching shared space:', error);
+                contentArea.textContent = 'An error occurred while fetching the shared space.';
             }
         }
 
-        document.getElementById('add-note-btn').addEventListener('click', async () => {
+        function displayNotes(notes) {
+            const contentArea = document.getElementById('content-area');
+            contentArea.innerHTML = `
+                <div class="shareable-link">Shareable Link: ${window.location.origin}/pub/${shortCode}</div>
+                <div class="add-note-form">
+                    <h2>Add New Note</h2>
+                    <textarea id="new-note-content" placeholder="Enter your note here (max 400 characters)"></textarea>
+                    <button id="add-note-btn">Add Note</button>
+                </div>
+                <div class="notes-container">
+                    ${notes.map(note => `
+                        <div class="note">
+                            <div class="note-username">${note.username}</div>
+                            <div class="note-timestamp">${note.timestamp}</div>
+                            <div class="note-content">${note.content}</div>
+                            <div class="note-actions">
+                                <button onclick="likeNote('${note._id}')">Like (${note.likes})</button>
+                                <button onclick="dislikeNote('${note._id}')">Dislike (${note.dislikes})</button>
+                                ${note.username === currentUsername ? `<button onclick="deleteNote('${note._id}')">Delete</button>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            document.getElementById('add-note-btn').addEventListener('click', addNote);
+        }
+
+        async function addNote() {
             const content = document.getElementById('new-note-content').value.trim();
             if (!content) {
                 alert('Please enter a note.');
@@ -315,7 +399,7 @@
             }
 
             try {
-                const response = await fetch('/api/public_notes', {
+                const response = await fetch(`/api/public_spaces/${shortCode}/notes`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -324,37 +408,61 @@
                 });
 
                 if (response.ok) {
-                    const newNote = await response.json();
-                    alert(`Public note created successfully! Short code: ${newNote.short_code}`);
+                    await fetchSharedSpace(); // Refresh the notes
                     document.getElementById('new-note-content').value = '';
-                    // You might want to update the display to show the new note
-                    // or redirect to the new note's page
                 } else {
                     const error = await response.json();
-                    alert(`Failed to create note: ${error.error}`);
+                    alert(`Failed to add note: ${error.error}`);
                 }
             } catch (error) {
-                console.error('Error creating public note:', error);
-                alert('An error occurred while creating the public note.');
+                console.error('Error adding note:', error);
+                alert('An error occurred while adding the note.');
             }
-        });
+        }
 
-        document.getElementById('revoke-btn').addEventListener('click', async () => {
-            if (confirm('Are you sure you want to revoke sharing for this note?')) {
+        async function likeNote(noteId) {
+            await updateNoteLikes(noteId, 'like');
+        }
+
+        async function dislikeNote(noteId) {
+            await updateNoteLikes(noteId, 'dislike');
+        }
+
+        async function updateNoteLikes(noteId, action) {
+            try {
+                const response = await fetch(`/api/public_spaces/${shortCode}/notes/${noteId}/${action}`, {
+                    method: 'POST',
+                });
+
+                if (response.ok) {
+                    await fetchSharedSpace(); // Refresh the notes
+                } else {
+                    alert(`Failed to ${action} note. Please try again.`);
+                }
+            } catch (error) {
+                console.error(`Error ${action}ing note:`, error);
+                alert(`An error occurred while ${action}ing the note.`);
+            }
+        }
+
+        async function deleteNote(noteId) {
+            if (confirm('Are you sure you want to delete this note?')) {
                 try {
-                    const response = await fetch(`/api/notes/${shortCode}/revoke_share`, { method: 'POST' });
+                    const response = await fetch(`/api/public_spaces/${shortCode}/notes/${noteId}`, {
+                        method: 'DELETE',
+                    });
+
                     if (response.ok) {
-                        alert('Sharing has been revoked for this note.');
-                        window.location.href = '/';
+                        await fetchSharedSpace(); // Refresh the notes
                     } else {
-                        alert('Failed to revoke sharing. Please try again.');
+                        alert('Failed to delete note. Please try again.');
                     }
                 } catch (error) {
-                    console.error('Error revoking share:', error);
-                    alert('An error occurred while revoking share.');
+                    console.error('Error deleting note:', error);
+                    alert('An error occurred while deleting the note.');
                 }
             }
-        });
+        }
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
             try {
@@ -370,7 +478,7 @@
             }
         });
 
-        fetchSharedNote();
+        fetchSharedSpace();
     </script>
 </body>
 </html>
