@@ -232,33 +232,65 @@
         .auth-form {
             max-width: 300px;
             margin: 0 auto;
-            background: rgba(255, 253, 240, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 253, 240, 0.9);
+            padding: 30px 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+            font-family: 'Helvetica Neue', sans-serif;
+            text-align: center;
+        }
+
+        .auth-form h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #a67c52;
         }
 
         .auth-form input {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
             border: 1px solid #d3bc8d;
             border-radius: 5px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .auth-form input:focus {
+            border-color: #a67c52;
+            box-shadow: 0 0 5px rgba(166, 124, 82, 0.5);
+            outline: none;
         }
 
         .auth-form button {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background: #a67c52;
             color: #fff;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 18px;
+            transition: background 0.3s ease;
         }
 
         .auth-form button:hover {
             background: #8c6142;
         }
+
+        .auth-form a {
+            display: block;
+            margin-top: 10px;
+            color: #a67c52;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .auth-form a:hover {
+            color: #8c6142;
+        } 
+
 
         #logout-btn {
             position: absolute;
@@ -369,6 +401,7 @@
         const logoutBtn = document.getElementById('logout-btn');
         const charCount = document.getElementById('char-count');
 
+        // Function to handle login form display
         function showLoginForm() {
             authContainer.innerHTML = `
                 <form class="auth-form" id="login-form">
@@ -383,6 +416,7 @@
             document.getElementById('show-register').addEventListener('click', showRegisterForm);
         }
 
+        // Function to handle register form display
         function showRegisterForm() {
             authContainer.innerHTML = `
                 <form class="auth-form" id="register-form">
