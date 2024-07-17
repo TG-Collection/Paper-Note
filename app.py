@@ -156,7 +156,10 @@ async def get_public_notes(short_code):
     if not space:
         return jsonify({'error': 'Public space not found'}), 404
     serialized_notes = [{**note, '_id': str(note['_id'])} for note in space['notes']]
-    return jsonify(serialized_notes)
+    return jsonify({
+        'notes': serialized_notes,
+        'topic': space.get('topic_name', 'Untitled Topic')
+    })
 
 @app.route('/api/public_spaces/<short_code>/notes/<note_id>/like', methods=['POST'])
 async def like_public_note(short_code, note_id):

@@ -442,11 +442,11 @@
                     displayNotes(data.notes);
                     updateTopicDisplay();
                 } else {
-                    contentArea.textContent = 'Shared space not found or has been deleted.';
+                    throw new Error('Failed to fetch shared space');
                 }
             } catch (error) {
                 console.error('Error fetching shared space:', error);
-                contentArea.textContent = 'An error occurred while fetching the shared space.';
+                contentArea.textContent = 'An error occurred while fetching the shared space. Please try refreshing the page.';
             }
         }
 
