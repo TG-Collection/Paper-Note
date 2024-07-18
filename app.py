@@ -143,42 +143,47 @@ async def get_participants(short_code):
 
 @app.route('/api/public_spaces/<short_code>/notes', methods=['POST'])
 async def add_public_note(short_code):
-    if 'username' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    space = await public_spaces_collection.find_one({'short_code': short_code})
-    if not space:
-        return jsonify({'error': 'Public space not found'}), 404
-    
-    if space.get('locked', False) and space['creator'] != session['username']:
-        return jsonify({'error': 'This space is locked'}), 403
+    try:
+        if 'username' not in session:
+            return jsonify({'error': 'Unauthorized'}), 401
+        
+        space = await public_spaces_collection.find_one({'short_code': short_code})
+        if not space:
+            return jsonify({'error': 'Public space not found'}), 404
+        
+        if space.get('locked', False) and space['creator'] != session['username']:
+            return jsonify({'error': 'This space is locked'}), 403
 
-    data = await request.json
-    content = data.get('content')
+        data = await request.json
+        content = data.get('content')
+        
+        if not content:
+            return jsonify({'error': 'Content is required'}), 400
+        
+        if len(content) > 400:
+            return jsonify({'error': 'Note exceeds 400 character limit'}), 400
+        
+        kolkata_tz = pytz.timezone('Asia/Kolkata')
+        current_time = datetime.now(kolkata_tz)
+        
+        new_note = {
+            '_id': ObjectId(),
+            'content': content,
+            'username': session['username'],
+            'timestamp': current_time.strftime('%Y-%m-%d %H:%M:%S %Z'),
+            'likes': 0,
+            'dislikes': 0
+        }
+        result = await public_spaces_collection.update_one(
+            {'short_code': short_code},
+            {'$push': {'notes': new_note}}
+        )  
+        new_note['_id'] = str(new_note['_id'])
+        return jsonify(new_note), 201
+    except Exception as e:
+        print(f"Error adding note: {str(e)}")  # Log the error
+        return jsonify({'error': f'An unexpected error occurred: {str(e)}'}), 500
     
-    if not content:
-        return jsonify({'error': 'Content is required'}), 400
-    
-    if len(content) > 400:
-        return jsonify({'error': 'Note exceeds 400 character limit'}), 400
-    
-    kolkata_tz = pytz.timezone('Asia/Kolkata')
-    current_time = datetime.now(kolkata_tz)
-    
-    new_note = {
-        '_id': ObjectId(),
-        'content': content,
-        'username': session['username'],
-        'timestamp': current_time.strftime('%Y-%m-%d %H:%M:%S %Z'),
-        'likes': 0,
-        'dislikes': 0
-    }
-    result = await public_spaces_collection.update_one(
-        {'short_code': short_code},
-        {'$push': {'notes': new_note}}
-    )  
-    new_note['_id'] = str(new_note['_id'])
-    return jsonify(new_note), 201
 
 @app.route('/api/public_spaces/<short_code>/toggle_lock', methods=['POST'])
 async def toggle_lock(short_code):
