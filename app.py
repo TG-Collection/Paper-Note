@@ -26,7 +26,28 @@ async def is_space_locked(short_code):
     space = await public_spaces_collection.find_one({'short_code': short_code})
     return space.get('locked', False) if space else False
 
-# Update the create_public_space function to include the 'locked' field
+async def is_space_hidden(short_code):
+    space = await public_spaces_collection.find_one({'short_code': short_code})
+    return space.get('hidden', False) if space else False
+
+@app.route('/api/public_spaces/<short_code>/toggle_hide', methods=['POST'])
+async def toggle_hide_space(short_code):
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    space = await public_spaces_collection.find_one({'short_code': short_code})
+    if not space or space['creator'] != session['username']:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    new_hidden_status = not space.get('hidden', False)
+    await public_spaces_collection.update_one(
+        {'short_code': short_code},
+        {'$set': {'hidden': new_hidden_status}}
+    )
+    
+    return jsonify({'hidden': new_hidden_status}), 200
+
+# Update the create_public_space function to include the 'hidden' field
 @app.route('/api/create_public_space', methods=['POST'])
 async def create_public_space():
     if 'username' not in session:
@@ -46,7 +67,8 @@ async def create_public_space():
         'last_updated': datetime.now(pytz.timezone('Asia/Kolkata')),
         'topic_name': topic_name,
         'notes': [],
-        'locked': False  # Add this line
+        'locked': False,
+        'hidden': False  # Add this line
     }
     
     result = await public_spaces_collection.insert_one(new_space)
