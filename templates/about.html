@@ -8,58 +8,74 @@
     <style>
         body {
             font-family: 'Georgia', serif;
-            background-color: #f4f1e5;
+            background-color: #f2e8c9;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-image: url('https://www.transparenttextures.com/patterns/old-paper.png');
+            background-image: url('https://www.transparenttextures.com/patterns/old-map.png');
         }
 
         .vintage-paper {
-            background: rgba(255, 255, 255, 0.8); /* Frosted matte finish */
-            backdrop-filter: blur(5px); /* Frosted glass effect */
-            width: 80%;
-            max-width: 800px;
-            padding: 20px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-            border: 1px solid #d2b48c;
-            border-radius: 10px; /* Rounded corners for a polished look */
-            overflow: hidden; /* Prevents horizontal overflow */
+            background-color: #e8dcc0;
+            width: 90%;
+            max-width: 600px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid #b8a88a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vintage-paper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+            opacity: 0.5;
+            pointer-events: none;
         }
 
         .header {
             text-align: center;
-            border-bottom: 2px solid #d2b48c;
+            border-bottom: 2px solid #b8a88a;
             padding-bottom: 20px;
             margin-bottom: 20px;
+            position: relative;
         }
 
         .profile-img {
-            width: 150px;
-            height: 150px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
-            border: 3px solid #d2b48c;
+            border: 3px solid #b8a88a;
             margin-bottom: 15px;
+            filter: sepia(30%);
         }
 
         h1 {
             margin: 0;
-            color: #5a4631;
+            color: #4a3c2c;
+            font-size: 2.5em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
         h2 {
-            color: #5a4631;
-            border-bottom: 1px solid #d2b48c;
+            color: #4a3c2c;
+            border-bottom: 1px solid #b8a88a;
             padding-bottom: 10px;
+            font-size: 1.5em;
         }
 
         p {
-            color: #4b3b30;
+            color: #5c4b38;
             line-height: 1.6;
-            font-size: 18px;
+            font-size: 1em;
         }
 
         .social-links {
@@ -70,18 +86,34 @@
         .social-links a {
             margin: 0 10px;
             text-decoration: none;
-            color: #4b3b30;
-            font-size: 24px;
+            color: #5c4b38;
+            font-size: 1.5em;
+            transition: color 0.3s ease;
         }
 
         .social-links a:hover {
-            color: #5a4631;
+            color: #8b7355;
         }
 
-        /* Responsive styles */
-        @media (max-width: 768px) {
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
             .vintage-paper {
-                width: 95%; /* Adjust width for smaller screens */
+                width: 100%;
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.3em;
+            }
+            p {
+                font-size: 0.9em;
+            }
+            .social-links a {
+                font-size: 1.3em;
             }
         }
     </style>
@@ -101,7 +133,6 @@
             <h2>Connect with me</h2>
             <a href="https://github.com/MeeRazi" target="_blank" title="GitHub">
                 <i class="fab fa-github"></i>
-            </a>
             </a>
             <a href="https://twitter.com/MeeRazi" target="_blank" title="Twitter">
                 <i class="fab fa-twitter"></i>
