@@ -30,19 +30,21 @@
             color: var(--text-color);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
         }
 
         .container {
-            width: 90%;
+            flex-grow: 1;
+            width: 100%;
             max-width: 1200px;
+            margin: 0 auto;
             background: rgba(255, 253, 240, 0.7);
-            border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 0 20px rgba(0, 0, 0, 0.08) inset;
-            padding: 40px;
+            padding: 40px 20px;
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         h1 {
@@ -52,19 +54,16 @@
             text-align: center;
             margin-bottom: 30px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-            padding-top: 40px; /* Added padding to prevent overlap with buttons */
+            padding-top: 40px;
         }
 
         #notes-container {
-            height: calc(100vh - 400px);
+            flex-grow: 1;
             overflow-y: auto;
-            margin-bottom: 30px;
             padding: 20px;
-            border-radius: 10px;
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
+            margin-bottom: 80px; /* Space for the floating input */
         }
 
         .note {
@@ -105,14 +104,16 @@
         }
 
         #add-note-form {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--background-color);
+            padding: 10px 20px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
-            position: sticky;
-            bottom: 0;
-            background: var(--background-color);
-            padding: 10px;
-            border-radius: 10px;
+            align-items: center;
         }
 
         #note-input {
@@ -141,32 +142,28 @@
             font-size: 16px;
             font-weight: 600;
             transition: background 0.3s;
-            transform: translateX(-25px); /* Move slightly to the left */
-            }
+        }
 
         #add-note-btn:hover {
             background: #8c6142;
         }
 
         #char-count {
-            position: absolute;
-            right: 70px;
-            top: 50%;
-            transform: translateY(-50%);
             font-size: 0.8em;
             color: #666;
+            margin-right: 10px;
         }
 
         .action-btn {
             position: absolute;
             top: 10px;
-            padding: 8px 16px; /* Reduced padding */
+            padding: 8px 16px;
             background: var(--primary-color);
             color: #fff;
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 14px; /* Reduced font size */
+            font-size: 14px;
             transition: background 0.3s;
         }
 
@@ -209,6 +206,7 @@
             padding: 20px 0;
             font-size: 0.9em;
             color: #666;
+            background: var(--background-color);
         }
 
         footer a {
@@ -232,37 +230,30 @@
 
         @media (max-width: 768px) {
             .container {
-                width: 95%;
-                padding: 20px;
+                padding: 20px 10px;
             }
 
             h1 {
                 font-size: 2em;
-                padding-top: 60px; /* Increased padding for mobile */
-            }
-
-            #notes-container {
-                height: calc(100vh - 250px);
-            }
-
-            #add-note-form {
-                flex-direction: row;
-            }
-
-            #add-note-btn {
-                width: auto;
-                margin-top: 0;
-            }
-
-            #char-count {
-                position: static;
-                text-align: right;
-                margin-bottom: 5px;
+                padding-top: 60px;
             }
 
             .action-btn {
-                font-size: 17px; /* Further reduced font size for mobile */
-                padding: 9px 17px; /* Further reduced padding for mobile */
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            #add-note-form {
+                padding: 10px;
+            }
+
+            #note-input {
+                font-size: 14px;
+            }
+
+            #add-note-btn {
+                padding: 8px 16px;
+                font-size: 14px;
             }
         }
     </style>
@@ -277,18 +268,18 @@
             <button id="logout-btn" class="action-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
             <button id="all-spaces-btn" class="action-btn"><i class="fas fa-th"></i> My Spaces</button>
             <div id="notes-container"></div>
-            <form id="add-note-form">
-                <input type="text" id="note-input" placeholder="Enter note or type / to search..." maxlength="400" required>
-                <span id="char-count">400</span>
-                <button type="submit" id="add-note-btn">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </form>
         </div>
-        <footer>
-            <p>© 2024 | Made with <i class="fas fa-heart" style="color: var(--primary-color);"></i> by <a href="/about" target="_blank">RAZi</a></p>
-        </footer>
     </div>
+    <form id="add-note-form">
+        <input type="text" id="note-input" placeholder="Enter note or type / to search..." maxlength="400" required>
+        <span id="char-count">400</span>
+        <button type="submit" id="add-note-btn">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </form>
+    <footer>
+        <p>© 2024 | Made with <i class="fas fa-heart" style="color: var(--primary-color);"></i> by <a href="/about" target="_blank">RAZi</a></p>
+    </footer>
 
     <script>
         const mainContainer = document.getElementById('main-container');
