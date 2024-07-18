@@ -367,6 +367,45 @@
         #copy-link-btn:active {
             transform: scale(0.98);
         }
+        #lock-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        #lock-btn:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        #lock-btn:active {
+            transform: scale(0.98);
+        }
+
+        #login-btn {
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        #login-btn:hover {
+            background-color: #007B9A;
+            transform: scale(1.05);
+        }
+
+        #login-btn:active {
+            transform: scale(0.98);
+        }
     </style>
 </head>
 <body>
@@ -378,8 +417,11 @@
             <div class="button-group">
                 <a href="/spaces" class="button">Back</a>
                 <button id="copy-link-btn" class="button">Copy Link</button>
-                <button id="delete-space-btn" class="delete-space-btn">Delete</button>
+                <button id="lock-btn" style="display: none;">Lock</button>
+                <button id="login-btn" style="display: none;">Login</button>
+                <button id="delete-space-btn" class="delete-space-btn" style="display: none;">Delete</button>
             </div>
+        </div>
         </div>
         <h1>Shared Space</h1>
         <div class="topic-container">
@@ -406,6 +448,8 @@
         let isLoggedIn = false;
         let currentUsername = '';
         let currentTopic = '';
+        let isCreator = false;
+        let isLocked = false;
 
         async function checkLoginStatus() {
             try {
@@ -429,18 +473,16 @@
             await checkLoginStatus();
             const contentArea = document.getElementById('content-area');
 
-            if (!isLoggedIn) {
-                window.location.href = `/auth?next=${encodeURIComponent(window.location.pathname)}`;
-                return;
-            }
-
             try {
                 const response = await fetch(`/api/public_spaces/${shortCode}/notes`);
                 if (response.ok) {
                     const data = await response.json();
                     currentTopic = data.topic;
+                    isLocked = data.locked;
+                    isCreator = data.creator === currentUsername;
                     displayNotes(data.notes);
                     updateTopicDisplay();
+                    updateUIBasedOnStatus();
                 } else {
                     throw new Error('Failed to fetch shared space');
                 }
@@ -450,6 +492,89 @@
             }
         }
 
+        function updateUIBasedOnStatus() {
+            const addNoteForm = document.querySelector('.add-note-form');
+            const lockBtn = document.getElementById('lock-btn');
+            const loginBtn = document.getElementById('login-btn');
+            const deleteSpaceBtn = document.getElementById('delete-space-btn');
+
+            if (isCreator) {
+                lockBtn.style.display = 'inline-block';
+                lockBtn.textContent = isLocked ? 'Unlock' : 'Lock';
+                deleteSpaceBtn.style.display = 'inline-block';
+            } else {
+                lockBtn.style.display = 'none';
+                deleteSpaceBtn.style.display = 'none';
+            }
+
+            if (isLoggedIn) {
+                loginBtn.style.display = 'none';
+                if (!isLocked || isCreator) {
+                    addNoteForm.style.display = 'block';
+                } else {
+                    addNoteForm.style.display = 'none';
+                }
+            } else {
+                loginBtn.style.display = 'inline-block';
+                addNoteForm.style.display = 'none';
+            }
+        }
+
+        function displayNotes(notes) {
+            notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            const contentArea = document.getElementById('content-area');
+            contentArea.innerHTML = `
+                <div class="add-note-form" style="display: none;">
+                    <textarea id="new-note-content" placeholder="Enter your note here (max 400 characters)"></textarea>
+                    <button id="add-note-btn">Add Note</button>
+                </div>
+                <div class="notes-container">
+                    ${notes.map(note => `
+                        <div class="note">
+                            <div class="note-username">${note.username}</div>
+                            <div class="note-timestamp">${note.timestamp}</div>
+                            <div class="note-content">${note.content}</div>
+                            <div class="note-actions">
+                                <button onclick="likeNote('${note._id}')"><i class="fas fa-thumbs-up"></i> ${note.likes}</button>
+                                <button onclick="dislikeNote('${note._id}')"><i class="fas fa-thumbs-down"></i> ${note.dislikes}</button>
+                                ${(note.username === currentUsername || isCreator) && !isLocked ? `
+                                    <button onclick="deleteNote('${note._id}')"><i class="fas fa-trash"></i></button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            document.getElementById('add-note-btn').addEventListener('click', addNote);
+            updateUIBasedOnStatus();
+        }
+
+        async function toggleLock() {
+            try {
+                const response = await fetch(`/api/public_spaces/${shortCode}/toggle_lock`, {
+                    method: 'POST',
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    isLocked = data.locked;
+                    updateUIBasedOnStatus();
+                    await fetchSharedSpace();
+                } else {
+                    const error = await response.json();
+                    alert(`Failed to toggle lock: ${error.error}`);
+                }
+            } catch (error) {
+                console.error('Error toggling lock:', error);
+                alert('An error occurred while toggling the lock.');
+            }
+        }
+
+        function login() {
+            window.location.href = `/auth?next=${encodeURIComponent(window.location.pathname)}`;
+        }
         async function deleteNote(noteId) {
             if (!noteId || noteId === 'undefined') {
                 alert('Invalid note ID. Cannot delete note.');
@@ -472,36 +597,6 @@
                     alert('An error occurred while deleting the note.');
                 }
             }
-        }
-
-        function displayNotes(notes) {
-            notes.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-
-            const contentArea = document.getElementById('content-area');
-            contentArea.innerHTML = `
-                <div class="add-note-form">
-                    <textarea id="new-note-content" placeholder="Enter your note here (max 400 characters)"></textarea>
-                    <button id="add-note-btn">Add Note</button>
-                </div>
-                <div class="notes-container">
-                    ${notes.map(note => `
-                        <div class="note">
-                            <div class="note-username">${note.username}</div>
-                            <div class="note-timestamp">${note.timestamp}</div>
-                            <div class="note-content">${note.content}</div>
-                            <div class="note-actions">
-                                <button onclick="likeNote('${note._id}')"><i class="fas fa-thumbs-up"></i> ${note.likes}</button>
-                                <button onclick="dislikeNote('${note._id}')"><i class="fas fa-thumbs-down"></i> ${note.dislikes}</button>
-                                ${note.username === currentUsername ? `
-                                    <button onclick="deleteNote('${note._id}')"><i class="fas fa-trash"></i></button>
-                                ` : ''}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-
-            document.getElementById('add-note-btn').addEventListener('click', addNote);
         }
 
         async function addNote() {
@@ -636,6 +731,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('delete-space-btn').addEventListener('click', deleteSharedSpace);
             document.getElementById('copy-link-btn').addEventListener('click', copyShareableLink);
+            document.getElementById('lock-btn').addEventListener('click', toggleLock);
+            document.getElementById('login-btn').addEventListener('click', login);
             fetchSharedSpace();
         });
     </script>
