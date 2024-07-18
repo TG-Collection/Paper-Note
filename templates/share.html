@@ -126,18 +126,6 @@
             margin-right: 10px;
         }
 
-        .edit-topic-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1em;
-            color: #a67c52;
-        }
-
-        .edit-topic-btn:hover {
-            color: #8c6142;
-        }
-
         .notes-container {
             margin-top: 20px;
         }
@@ -299,7 +287,7 @@
             <div class="button-group">
                 <a href="/spaces" class="button"><i class="fas fa-arrow-left" title="Back"></i></a>
                 <button id="copy-link-btn" title="Copy Link"><i class="fas fa-copy"></i></button>
-                <button id="edit-btn" style="display: none;" title="Edit"><i class="fas fa-edit"></i></button>
+                <button id="lock-btn" style="display: none;" title="Lock"><i class="fas fa-lock"></i></button>
                 <button id="hide-btn" style="display: none;" title="Hide Space"><i class="fas fa-eye-slash"></i></button>
                 <button id="login-btn" style="display: none;" title="Login"><i class="fas fa-sign-in-alt"></i></button>
                 <button id="delete-space-btn" style="display: none;" title="Delete"><i class="fas fa-skull"></i></button>
@@ -308,7 +296,7 @@
         <h1 id="topic-name">Loading...</h1>
         <div id="content-area"></div>
         <footer>
-            <p>© 2024 | Made with ❤️ by <a href="/about" target="_blank">RAZi</a></p>
+            <p>© 2024 | Made with <i class="fas fa-heart" style="color: #a67c52;"></i> by <a href="/about" target="_blank">RAZi</a></p>
         </footer>
     </div>
 
@@ -318,6 +306,7 @@
             <feDisplacementMap in="SourceGraphic" scale="5"/>
         </filter>
     </svg>
+
 
     <script>
         const shortCode = window.location.pathname.split('/').pop();
@@ -374,13 +363,23 @@
 
         function updateUIBasedOnStatus() {
             const addNoteForm = document.querySelector('.add-note-form');
-            const editBtn = document.getElementById('edit-btn');
+            const lockBtn = document.getElementById('lock-btn');
             const hideBtn = document.getElementById('hide-btn');
             const loginBtn = document.getElementById('login-btn');
             const deleteSpaceBtn = document.getElementById('delete-space-btn');
 
+            lockBtn.style.display = isCreator ? 'inline-flex' : 'none';
             editBtn.style.display = isCreator ? 'inline-flex' : 'none';
             hideBtn.style.display = isCreator ? 'inline-flex' : 'none';
+
+            if (isLocked) {
+                lockBtn.innerHTML = '<i class="fas fa-unlock"></i>';
+                lockBtn.title = 'Unlock';
+            } else {
+                lockBtn.innerHTML = '<i class="fas fa-lock"></i>';
+                lockBtn.title = 'Lock';
+            }
+
             if (isHidden) {
                 hideBtn.innerHTML = '<i class="fas fa-eye"></i>';
                 hideBtn.title = 'Unhide';
@@ -388,6 +387,7 @@
                 hideBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
                 hideBtn.title = 'Hide';
             }
+
             deleteSpaceBtn.style.display = isCreator ? 'inline-flex' : 'none';
             
             if (isLoggedIn) {
@@ -458,6 +458,25 @@
                 alert('An error occurred while toggling the hide status.');
             }
         }
+
+        async function toggleLock() {
+            try {
+                const response = await fetch(`/api/public_spaces/${shortCode}/toggle_lock`, { method: 'POST' });
+                if (response.ok) {
+                    const data = await response.json();
+                    isLocked = data.locked;
+                    updateUIBasedOnStatus();
+                    await fetchSharedSpace();
+                } else {
+                    const error = await response.json();
+                    alert(`Failed to toggle lock: ${error.error}`);
+                }
+            } catch (error) {
+                console.error('Error toggling lock:', error);
+                alert('An error occurred while toggling the lock status.');
+            }
+        }
+
 
         async function deleteNote(noteId) {
             if (!noteId || noteId === 'undefined') {
@@ -555,30 +574,6 @@
             document.getElementById('topic-name').textContent = currentTopic || 'Untitled Topic';
         }
 
-        async function editTopic() {
-            const newTopic = prompt('Enter new topic name:', currentTopic);
-            if (newTopic !== null && newTopic.trim() !== '') {
-                try {
-                    const response = await fetch(`/api/public_spaces/${shortCode}/edit_topic`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ topic: newTopic.trim() }),
-                    });
-
-                    if (response.ok) {
-                        currentTopic = newTopic.trim();
-                        updateTopicDisplay();
-                    } else {
-                        const error = await response.json();
-                        alert(`Failed to update topic: ${error.error}`);
-                    }
-                } catch (error) {
-                    console.error('Error updating topic:', error);
-                    alert('An error occurred while updating the topic.');
-                }
-            }
-        }
-
         function copyShareableLink() {
             const shareableLink = `${window.location.origin}/pub/${shortCode}`;
             navigator.clipboard.writeText(shareableLink)
@@ -592,12 +587,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('delete-space-btn').addEventListener('click', deleteSharedSpace);
             document.getElementById('copy-link-btn').addEventListener('click', copyShareableLink);
-            document.getElementById('edit-btn').addEventListener('click', editTopic);
+            document.getElementById('lock-btn').addEventListener('click', toggleLock);
             document.getElementById('hide-btn').addEventListener('click', toggleHide);
             document.getElementById('login-btn').addEventListener('click', login);
             fetchSharedSpace();
         });
-
     </script>
 </body>
 </html>
