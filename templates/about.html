@@ -14,7 +14,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             background-image: url('https://www.transparenttextures.com/patterns/old-paper.png');
         }
 
@@ -27,6 +27,7 @@
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
             border: 1px solid #d2b48c;
             border-radius: 10px; /* Rounded corners for a polished look */
+            overflow: hidden; /* Prevents horizontal overflow */
         }
 
         .header {
@@ -76,6 +77,13 @@
         .social-links a:hover {
             color: #5a4631;
         }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .vintage-paper {
+                width: 95%; /* Adjust width for smaller screens */
+            }
+        }
     </style>
 </head>
 <body>
@@ -87,7 +95,7 @@
         </div>
         <div class="content">
             <h2>About Me</h2>
-            <p>Hello! I'm RAZi, a passionate Python developer who loves creating Telegram bots. My journey in programming began with curiosity and has blossomed into a career I deeply enjoy. I take pride in crafting efficient and innovative solutions to everyday problems through code. When I'm not coding, you can find me exploring new technologies, reading about the latest in software development, or contributing to open-source projects.</p>
+            <p>Hello! I'm RAZi, a nursing student who loves programming as a hobby. I enjoy creating Telegram bots and crafting innovative solutions through code in my free time.</p>
         </div>
         <div class="social-links">
             <h2>Connect with me</h2>
