@@ -249,22 +249,26 @@
             z-index: 9999;
         }
 
-        .loading-content {
-            text-align: center;
-            background: rgba(255, 253, 240, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(244, 230, 201, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
 
         .loading-spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #a67c52;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #a67c52;
+            border-top: 5px solid #f9f3e3;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
         }
 
         @keyframes spin {
@@ -276,10 +280,8 @@
 <body>
     <div class="vintage-background"></div>
     <div class="loading-screen" id="loading-screen">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <p>Loading...</p>
-        </div>
+        <div class="loading-spinner"></div>
+    </div>
     </div>
     <div class="container">
         <div class="top-navigation">
