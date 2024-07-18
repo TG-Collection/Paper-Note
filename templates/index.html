@@ -86,8 +86,7 @@
 
         #notes-container {
             width: 100%;
-            height: 60vh;
-            overflow: hidden;
+            height: calc(100vh - 250px);
             overflow-y: auto;
             position: relative;
             margin-bottom: 30px;
@@ -166,6 +165,11 @@
             gap: 10px;
             margin-bottom: 20px;
             align-items: flex-end;
+            position: sticky;
+            bottom: 0;
+            background: rgba(255, 253, 240, 0.9);
+            padding: 10px;
+            border-top: 1px solid #d3bc8d;
         }
 
         .input-wrapper {
@@ -214,30 +218,11 @@
             background: #8c6142;
         }
 
-        #logout-btn {
+        #logout-btn, #all-spaces-btn {
             position: absolute;
             font-size: 16px;
             font-weight: 600;
             top: 10px;
-            right: 10px;
-            padding: 10px 15px;
-            background: #a67c52;
-            color: #fff;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-        }
-
-        #logout-btn:hover {
-            background: #8c6142;
-        }
-
-        #all-spaces-btn {
-            position: absolute;
-            font-size: 16px;
-            font-weight: 600;
-            top: 10px;
-            left: 10px;
             padding: 10px 15px;
             background: #a67c52;
             color: #fff;
@@ -247,7 +232,15 @@
             transition: background 0.3s;
         }
 
-        #all-spaces-btn:hover {
+        #logout-btn {
+            right: 10px;
+        }
+
+        #all-spaces-btn {
+            left: 10px;
+        }
+
+        #logout-btn:hover, #all-spaces-btn:hover {
             background: #8c6142;
         }
 
@@ -328,8 +321,8 @@
     <div class="container">
         <h1>Vintage Paper Tag</h1>
         <div id="main-container" style="display: none;">
-            <button id="logout-btn">Logout</button>
-            <button id="all-spaces-btn">My Spaces</button>
+            <button id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <button id="all-spaces-btn"><i class="fas fa-th"></i> My Spaces</button>
             <div id="notes-container"></div>
             <form id="add-note-form">
                 <div class="input-wrapper">
@@ -341,7 +334,7 @@
                 </button>
             </form>
             <footer>
-                <p>© 2024 | Made with ❤️ by <a href="/about" target="_blank">RAZi</a></p>
+                <p>© 2024 | Made with <i class="fas fa-heart" style="color: #a67c52;"></i> by <a href="/about" target="_blank">RAZi</a></p>
             </footer>
         </div>
     </div>
@@ -374,7 +367,7 @@
                 </div>
             `;
 
-            const left = Math.random() * (notesContainer.clientWidth - 300);
+            const left = Math.random() * (notesContainer.clientWidth - 200);
             const top = Math.random() * (notesContainer.clientHeight - 150);
             noteEl.style.left = `${left}px`;
             noteEl.style.top = `${top}px`;
