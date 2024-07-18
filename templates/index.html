@@ -183,13 +183,21 @@
         #note-input {
             width: 100%;
             padding: 10px 15px;
-            border: 1px solid #d3bc8d;
+            border: 2px solid #d3bc8d;
             border-radius: 25px;
             font-size: 16px;
             background: rgba(255, 253, 240, 0.8);
             color: #3a3a3a;
             height: 42px; 
             box-sizing: border-box;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        #note-input:focus {
+            outline: none;
+            border-color: #a67c52;
+            box-shadow: 0 0 5px rgba(166, 124, 82, 0.5);
         }
 
         #char-count {
@@ -303,13 +311,33 @@
                 font-size: 2em;
             }
 
+            #notes-container {
+                height: calc(100vh - 250px);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 10px;
+            }
+
             .note {
-                width: 150px;
+                position: static;
+                width: 90%;
+                margin-bottom: 15px;
+                transform: none !important;
             }
 
             #all-spaces-btn, #logout-btn {
                 font-size: 14px;
                 padding: 8px 12px;
+            }
+
+            #add-note-form {
+                flex-direction: column;
+            }
+
+            #add-note-btn {
+                width: 100%;
+                margin-top: 10px;
             }
         }
     </style>
@@ -328,7 +356,7 @@
             <form id="add-note-form">
                 <div class="input-wrapper">
                     <span id="char-count">400 characters remaining</span>
-                    <input type="text" id="note-input" placeholder="Enter your message or search..." required>
+                    <input type="text" id="note-input" placeholder="Enter your message or type / to search..." required>
                 </div>
                 <button type="submit" id="add-note-btn">
                     <i class="fas fa-thumbtack"></i>
@@ -368,13 +396,15 @@
                 </div>
             `;
 
-            const left = Math.random() * (notesContainer.clientWidth - 200);
-            const top = Math.random() * (notesContainer.clientHeight - 150);
-            noteEl.style.left = `${left}px`;
-            noteEl.style.top = `${top}px`;
-            
-            noteEl.addEventListener('mousedown', startDragging);
-            noteEl.addEventListener('touchstart', startDragging);
+            if (window.innerWidth > 768) {
+                const left = Math.random() * (notesContainer.clientWidth - 200);
+                const top = Math.random() * (notesContainer.clientHeight - 150);
+                noteEl.style.left = `${left}px`;
+                noteEl.style.top = `${top}px`;
+                
+                noteEl.addEventListener('mousedown', startDragging);
+                noteEl.addEventListener('touchstart', startDragging);
+            }
             
             return noteEl;
         }
@@ -393,8 +423,11 @@
             const response = await fetch(`/api/notes?search=${searchQuery}`);
             if (response.ok) {
                 const notes = await response.json();
-                notes.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 notes.forEach(note => notesContainer.appendChild(createNoteElement(note)));
+                if (window.innerWidth <= 768) {
+                    notesContainer.scrollTop = notesContainer.scrollHeight;
+                }
             } else {
                 showLoginForm();
             }
@@ -408,7 +441,11 @@
             });
             if (response.ok) {
                 const note = await response.json();
-                notesContainer.appendChild(createNoteElement(note));
+                const noteEl = createNoteElement(note);
+                notesContainer.insertBefore(noteEl, notesContainer.firstChild);
+                if (window.innerWidth <= 768) {
+                    notesContainer.scrollTop = 0;
+                }
             } else {
                 showLoginForm();
             }
@@ -446,8 +483,8 @@
                 alert('Note exceeds 400 character limit');
                 return;
             }
-            if (inputValue.startsWith('/search ')) {
-                await fetchNotes(inputValue.slice(8));
+            if (inputValue.startsWith('/')) {
+                await fetchNotes(inputValue.slice(1));
             } else {
                 await addNote(inputValue);
             }
@@ -467,6 +504,7 @@
         });
 
         function startDragging(e) {
+            if (window.innerWidth <= 768) return;
             const note = e.target.closest('.note');
             const startX = e.clientX || e.touches[0].clientX;
             const startY = e.clientY || e.touches[0].clientY;
@@ -497,6 +535,7 @@
         }
 
         function animateNotes() {
+            if (window.innerWidth <= 768) return;
             const notes = document.querySelectorAll('.note');
             notes.forEach(note => {
                 const newTranslateY = Math.sin(Date.now() / 1000) * 10;
@@ -540,6 +579,26 @@
         }
 
         logoutBtn.addEventListener('click', handleLogout);
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                const notes = document.querySelectorAll('.note');
+                notes.forEach(note => {
+                    note.style.position = 'static';
+                    note.style.transform = 'none';
+                });
+            } else {
+                const notes = document.querySelectorAll('.note');
+                notes.forEach(note => {
+                    note.style.position = 'absolute';
+                    const left = Math.random() * (notesContainer.clientWidth - 200);
+                    const top = Math.random() * (notesContainer.clientHeight - 150);
+                    note.style.left = `${left}px`;
+                    note.style.top = `${top}px`;
+                });
+                animateNotes();
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', checkLoginStatus);
     </script>
