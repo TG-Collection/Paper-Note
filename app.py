@@ -336,6 +336,11 @@ async def index():
         return redirect(url_for('login'))
     return await render_template('index.html')
 
+
+@app.route('/about')
+async def about():
+    return await render_template('about.html')
+
 @app.route('/login', methods=['GET', 'POST'])
 async def login():
     if request.method == 'POST':
