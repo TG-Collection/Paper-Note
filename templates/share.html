@@ -247,20 +247,62 @@
         footer a:hover {
             color: #8c6142;
         }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(210, 180, 140, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            text-align: center;
+            background: rgba(255, 253, 240, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #a67c52;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
     <div class="vintage-background"></div>
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Loading...</p>
+        </div>
+    </div>
     <div class="container">
         <div class="top-navigation">
             <a href="/" class="logo">Paper Tag</a>
             <div class="button-group">
                 <a href="/spaces" class="button"><i class="fas fa-arrow-left" title="Back"></i></a>
                 <button id="copy-link-btn" title="Copy Link"><i class="fas fa-copy"></i></button>
-                <button id="lock-btn" style="display: none;" title="Lock"><i class="fas fa-lock"></i></button>
+                <button id="edit-btn" style="display: none;" title="Edit"><i class="fas fa-edit"></i></button>
                 <button id="hide-btn" style="display: none;" title="Hide Space"><i class="fas fa-eye-slash"></i></button>
                 <button id="login-btn" style="display: none;" title="Login"><i class="fas fa-sign-in-alt"></i></button>
-                <button id="delete-space-btn" style="display: none;" title="Delete"><i class="fas fa-trash"></i></button>
+                <button id="delete-space-btn" style="display: none;" title="Delete"><i class="fas fa-skull"></i></button>
             </div>
         </div>
         <h1 id="topic-name">Loading...</h1>
@@ -323,26 +365,22 @@
                     throw new Error(`Failed to fetch shared space: ${response.status} ${errorText}`);
                 }
             } catch (error) {
-            console.error('Error fetching shared space:', error);
-            contentArea.textContent = `An error occurred while fetching the shared space: ${error.message}. Please try refreshing the page.`;
+                console.error('Error fetching shared space:', error);
+                contentArea.textContent = `An error occurred while fetching the shared space: ${error.message}. Please try refreshing the page.`;
+            } finally {
+                document.getElementById('loading-screen').style.display = 'none';
+            }
         }
-    }
+
         function updateUIBasedOnStatus() {
             const addNoteForm = document.querySelector('.add-note-form');
-            const lockBtn = document.getElementById('lock-btn');
+            const editBtn = document.getElementById('edit-btn');
             const hideBtn = document.getElementById('hide-btn');
             const loginBtn = document.getElementById('login-btn');
             const deleteSpaceBtn = document.getElementById('delete-space-btn');
 
-            lockBtn.style.display = isCreator ? 'inline-flex' : 'none';
+            editBtn.style.display = isCreator ? 'inline-flex' : 'none';
             hideBtn.style.display = isCreator ? 'inline-flex' : 'none';
-            if (isLocked) {
-                lockBtn.innerHTML = '<i class="fas fa-unlock"></i>';
-                lockBtn.title = 'Unlock';
-            } else {
-                lockBtn.innerHTML = '<i class="fas fa-lock"></i>';
-                lockBtn.title = 'Lock';
-            }
             if (isHidden) {
                 hideBtn.innerHTML = '<i class="fas fa-eye"></i>';
                 hideBtn.title = 'Unhide';
@@ -371,9 +409,9 @@
                 <div class="notes-container">
                     ${notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map(note => `
                         <div class="note">
-                            <div class="note-username">${note.username}</div>
-                            <div class="note-timestamp">${note.timestamp}</div>
-                            <div class="note-content">${formatNoteContent(note.content)}</div>
+                            <div class="note-username"><i class="fas fa-user"></i> ${note.username}</div>
+                            <div class="note-timestamp"><i class="fas fa-clock"></i> ${note.timestamp}</div>
+                            <div class="note-content"><i class="fas fa-sticky-note"></i> ${formatNoteContent(note.content)}</div>
                             <div class="note-actions">
                                 <button onclick="likeNote('${note._id}')"><i class="fas fa-thumbs-up"></i> ${note.likes}</button>
                                 <button onclick="dislikeNote('${note._id}')"><i class="fas fa-thumbs-down"></i> ${note.dislikes}</button>
@@ -391,39 +429,16 @@
         }
 
         function formatNoteContent(content) {
-            // Format bold text
             content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            // Format italic text
             content = content.replace(/\*(.*?)\*/g, '<em>$1</em>');
-            // Format monospace text
             content = content.replace(/```(.*?)```/g, '<code>$1</code>');
-            // Format strikethrough text
             content = content.replace(/~~(.*?)~~/g, '<del>$1</del>');
-            // Format links
             content = content.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
             return content;
         }
 
         function login() {
             window.location.href = `/auth?next=${encodeURIComponent(window.location.pathname)}`;
-        }
-
-        async function toggleLock() {
-            try {
-                const response = await fetch(`/api/public_spaces/${shortCode}/toggle_lock`, { method: 'POST' });
-                if (response.ok) {
-                    const data = await response.json();
-                    isLocked = data.locked;
-                    updateUIBasedOnStatus();
-                    await fetchSharedSpace();
-                } else {
-                    const error = await response.json();
-                    alert(`Failed to toggle lock: ${error.error}`);
-                }
-            } catch (error) {
-                console.error('Error toggling lock:', error);
-                alert('An error occurred while toggling the lock.');
-            }
         }
 
         async function toggleHide() {
@@ -577,7 +592,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('delete-space-btn').addEventListener('click', deleteSharedSpace);
             document.getElementById('copy-link-btn').addEventListener('click', copyShareableLink);
-            document.getElementById('lock-btn').addEventListener('click', toggleLock);
+            document.getElementById('edit-btn').addEventListener('click', editTopic);
             document.getElementById('hide-btn').addEventListener('click', toggleHide);
             document.getElementById('login-btn').addEventListener('click', login);
             fetchSharedSpace();
