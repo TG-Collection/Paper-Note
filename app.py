@@ -554,4 +554,4 @@ async def unhandled_exception(e):
     return await render_template('error.html', error_code=500, error_message="Unexpected Error", error_description=f"An unexpected error occurred: {str(e)}"), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 10000)), debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 10000)))
