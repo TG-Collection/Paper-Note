@@ -307,22 +307,18 @@
                 const response = await fetch(`/api/public_spaces/${shortCode}/notes`);
                 if (response.ok) {
                     const data = await response.json();
-                    currentTopic = data.topic;
-                    isLocked = data.locked;
-                    isHidden = data.hidden;
-                    isCreator = data.creator === currentUsername;
-                    displayNotes(data.notes);
-                    updateTopicDisplay();
-                    updateUIBasedOnStatus();
+                    // ... existing code ...
                 } else if (response.status === 403) {
-                    // Space is hidden and current user is not the creator
+                    console.log('Space is hidden, redirecting to /hide');
                     window.location.href = '/hide';
                 } else {
-                    throw new Error('Failed to fetch shared space');
+                    const errorText = await response.text();
+                    console.error('Failed to fetch shared space:', response.status, errorText);
+                    throw new Error(`Failed to fetch shared space: ${response.status} ${errorText}`);
                 }
             } catch (error) {
                 console.error('Error fetching shared space:', error);
-                contentArea.textContent = 'An error occurred while fetching the shared space. Please try refreshing the page.';
+                contentArea.textContent = `An error occurred while fetching the shared space: ${error.message}. Please try refreshing the page.`;
             }
         }
 

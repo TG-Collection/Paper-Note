@@ -207,24 +207,27 @@ async def toggle_lock(short_code):
 
 @app.route('/api/public_spaces/<short_code>/notes')
 async def get_public_space_notes(short_code):
-    space = await public_spaces_collection.find_one({'short_code': short_code})
-    if not space:
-        return jsonify({'error': 'Space not found'}), 404
-    
-    is_hidden = space.get('hidden', False)
-    is_creator = session.get('username') == space['creator']
-    
-    if is_hidden and not is_creator:
-        return jsonify({'error': 'Space is hidden'}), 403
-    
-    # Return the space data as before
-    return jsonify({
-        'topic': space['topic_name'],
-        'creator': space['creator'],
-        'locked': space['locked'],
-        'hidden': space['hidden'],
-        'notes': space['notes']
-    })
+       try:
+           space = await public_spaces_collection.find_one({'short_code': short_code})
+           if not space:
+               return jsonify({'error': 'Space not found'}), 404
+           
+           is_hidden = space.get('hidden', False)
+           is_creator = session.get('username') == space['creator']
+           
+           if is_hidden and not is_creator:
+               return jsonify({'error': 'Space is hidden'}), 403
+           
+           return jsonify({
+               'topic': space['topic_name'],
+               'creator': space['creator'],
+               'locked': space['locked'],
+               'hidden': space['hidden'],
+               'notes': space['notes']
+           })
+       except Exception as e:
+           print(f"Error in get_public_space_notes: {str(e)}")
+           return jsonify({'error': 'An unexpected error occurred'}), 500
 
 @app.route('/api/public_spaces/<short_code>/notes/<note_id>/like', methods=['POST'])
 async def like_public_note(short_code, note_id):
