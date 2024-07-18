@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Spaces - Paper Tag</title>
     <link rel="icon" type="image/png" href="/static/icon/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400;600&display=swap');
-        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 
         body {
             font-family: 'Source Sans Pro', sans-serif;
@@ -31,7 +31,7 @@
                 linear-gradient(rgba(210, 180, 140, 0.5), rgba(210, 180, 140, 0.5)),
                 url('/static/icon/pattern.png');
             background-size: cover;
-            background-position: center; /* Centers the background image */
+            background-position: center;
             z-index: -1;
         }
 
@@ -157,14 +157,25 @@
             margin-top: 15px;
         }
 
-        .delete-btn {
-            background: #f44336;
+        .action-btn {
             color: white;
             padding: 5px 10px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s ease;
+        }
+
+        .edit-topic-btn {
+            background: #4CAF50;
+        }
+
+        .edit-topic-btn:hover {
+            background: #45a049;
+        }
+
+        .delete-btn {
+            background: #f44336;
         }
 
         .delete-btn:hover {
@@ -188,19 +199,40 @@
             color: #8c6142;
         }
 
-        .edit-topic-btn {
-            background: #4CAF50;
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .edit-topic-btn:hover {
-            background: #45a049;
+        .no-spaces-message {
+            text-align: center;
+            padding: 40px;
+            background: #f4e6c9;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
+        .no-spaces-message h2 {
+            color: #a67c52;
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 20px;
+        }
+
+        .no-spaces-message p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .create-space-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #a67c52;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .create-space-btn:hover {
+            background: #8c6142;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -239,20 +271,34 @@
 
         function displaySpaces(spaces) {
             const container = document.getElementById('spaces-container');
-            container.innerHTML = spaces.map(space => `
-                <div class="space-card" onclick="navigateToSpace('${space.short_code}')">
-                    <h3>Topic: <span id="topic-${space.short_code}">${space.topic_name}</span></h3>
-                    <h4>Code: ${space.short_code}</h4>
-                    <div class="space-info">
-                        <p>Created: ${new Date(space.created_at).toLocaleString()}</p>
-                        <p>Notes: ${space.note_count}</p>
+            if (spaces.length === 0) {
+                container.innerHTML = `
+                    <div class="no-spaces-message">
+                        <h2>You don't have any shared spaces yet!</h2>
+                        <p>Create your first space to get started.</p>
+                        <a href="#" class="create-space-btn" onclick="createNewSpace()">Create a Space</a>
                     </div>
-                    <div class="space-actions">
-                        <button class="edit-topic-btn" onclick="editTopicName('${space.short_code}', event)">Edit Topic</button>
-                        <button class="delete-btn" onclick="deleteSpace('${space.short_code}', event)">Delete</button>
+                `;
+            } else {
+                container.innerHTML = spaces.map(space => `
+                    <div class="space-card" onclick="navigateToSpace('${space.short_code}')">
+                        <h3>Topic: <span id="topic-${space.short_code}">${space.topic_name}</span></h3>
+                        <h4>Code: ${space.short_code}</h4>
+                        <div class="space-info">
+                            <p>Created: ${new Date(space.created_at).toLocaleString()}</p>
+                            <p>Notes: ${space.note_count}</p>
+                        </div>
+                        <div class="space-actions">
+                            <button class="action-btn edit-topic-btn" onclick="editTopicName('${space.short_code}', event)" title="Edit Topic">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteSpace('${space.short_code}', event)" title="Delete Space">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
         }
 
         function navigateToSpace(shortCode) {
