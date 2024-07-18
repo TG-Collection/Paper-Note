@@ -173,7 +173,7 @@
         #all-spaces-btn { left: 10px; }
 
         #logout-btn, #all-spaces-btn {
-            size: 20px;
+            size: 10px;
         }
 
         .action-btn:hover {
@@ -329,7 +329,6 @@
                 const response = await fetch(`/api/notes?search=${searchQuery}`);
                 if (!response.ok) throw new Error('Failed to fetch notes');
                 const notes = await response.json();
-                notes.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
                 notesContainer.innerHTML = '';
                 notes.forEach(note => notesContainer.appendChild(createNoteElement(note)));
                 notesContainer.scrollTop = notesContainer.scrollHeight;
