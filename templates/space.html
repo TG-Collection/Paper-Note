@@ -17,28 +17,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #d2b48c;
+            background: #f4e6c9;
             color: #3a3a3a;
-        }
-
-        .vintage-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(210, 180, 140, 0.5), rgba(210, 180, 140, 0.5)),
-                url('/static/icon/pattern.png');
-            background-size: cover;
-            background-position: center;
-            z-index: -1;
         }
 
         .container {
             width: 90%;
             max-width: 800px;
-            background: rgba(255, 253, 240, 0.7);
+            background: #f9f3e3;
             border-radius: 15px;
             box-shadow: 
                 0 4px 6px rgba(0, 0, 0, 0.1), 
@@ -57,7 +43,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="paper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter><rect width="100" height="100" filter="url(%23paper)" opacity="0.1"/></svg>');
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.08"/></svg>');
             z-index: -1;
         }
 
@@ -158,31 +144,16 @@
         }
 
         .action-btn {
-            color: white;
-            padding: 5px 10px;
+            color: #a67c52;
+            background: none;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-size: 1.2em;
         }
 
-        .edit-topic-btn {
-            background: #c48f1d;
-            border-radius: 25px;
-        }
-
-        .edit-topic-btn:hover {
-            background: #c48f1d;
-        }
-
-        .delete-btn {
-            background: #c48f1d;
-            border-radius: 25px;
-
-        }
-
-        .delete-btn:hover {
-            background: #c48f1d;
+        .action-btn:hover {
+            color: #8c6142;
         }
 
         footer {
@@ -236,16 +207,45 @@
             background: #8c6142;
             transform: scale(1.05);
         }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(244, 230, 201, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #a67c52;
+            border-top: 5px solid #f9f3e3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <div class="vintage-background"></div>
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-spinner"></div>
+    </div>
     <div class="container">
         <div class="top-navigation">
             <a href="/" class="logo">Paper Tag</a>
             <div>
-                <button id="home-btn" class="button">Home</button>
-                <button id="create-space-btn" class="button">New Space</button>
+                <button id="home-btn" class="button"><i class="fas fa-home"></i> Home</button>
+                <button id="create-space-btn" class="button"><i class="fas fa-plus"></i> New Space</button>
             </div>
         </div>
         <h1>My Spaces</h1>
@@ -253,7 +253,7 @@
             <!-- Spaces will be dynamically inserted here -->
         </div>
         <footer>
-            <p>© 2024 | Made with ❤️ by <a href="/about" target="_blank">RAZi</a></p>
+            <p>© 2024 | Made with <i class="fas fa-heart"></i> by <a href="/about" target="_blank">RAZi</a></p>
         </footer>
     </div>
 
@@ -263,12 +263,14 @@
                 const response = await fetch('/api/public_spaces');
                 if (response.ok) {
                     const spaces = await response.json();
-                    displaySpaces(spaces);
+                    displaySpaces(spaces.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
                 } else {
                     console.error('Failed to fetch public spaces');
                 }
             } catch (error) {
                 console.error('Error fetching public spaces:', error);
+            } finally {
+                document.getElementById('loading-screen').style.display = 'none';
             }
         }
 
@@ -279,23 +281,23 @@
                     <div class="no-spaces-message">
                         <h2>You don't have any shared spaces yet!</h2>
                         <p>Create your first space to get started.</p>
-                        <a href="#" class="create-space-btn" onclick="createNewSpace()">Create a Space</a>
+                        <a href="#" class="create-space-btn" onclick="createNewSpace()"><i class="fas fa-plus"></i> Create a Space</a>
                     </div>
                 `;
             } else {
                 container.innerHTML = spaces.map(space => `
                     <div class="space-card" onclick="navigateToSpace('${space.short_code}')">
-                        <h3>Topic: <span id="topic-${space.short_code}">${space.topic_name}</span></h3>
-                        <h4>Code: ${space.short_code}</h4>
+                        <h3><i class="fas fa-book"></i> Topic: <span id="topic-${space.short_code}">${space.topic_name}</span></h3>
+                        <h4><i class="fas fa-hashtag"></i> Code: ${space.short_code}</h4>
                         <div class="space-info">
-                            <p>Created: ${new Date(space.created_at).toLocaleString()}</p>
-                            <p>Notes: ${space.note_count}</p>
+                            <p><i class="far fa-clock"></i> Created: ${new Date(space.created_at).toLocaleString()}</p>
+                            <p><i class="far fa-sticky-note"></i> Notes: ${space.note_count}</p>
                         </div>
                         <div class="space-actions">
-                            <button class="action-btn edit-topic-btn" onclick="editTopicName('${space.short_code}', event)" title="Edit Topic">
+                            <button class="action-btn" onclick="editTopicName('${space.short_code}', event)" title="Edit Topic">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="action-btn delete-btn" onclick="deleteSpace('${space.short_code}', event)" title="Delete Space">
+                            <button class="action-btn" onclick="deleteSpace('${space.short_code}', event)" title="Delete Space">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
