@@ -198,7 +198,7 @@ async def edit_public_note(short_code, note_id):
     except Exception as e:
         print(f"Error editing note: {str(e)}")  # Log the error
         return jsonify({'error': f'An unexpected error occurred: {str(e)}'}), 500
-
+    
 @app.route('/api/public_spaces/<short_code>/toggle_lock', methods=['POST'])
 async def toggle_lock(short_code):
     if 'username' not in session:
