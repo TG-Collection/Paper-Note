@@ -138,8 +138,8 @@ async def add_public_note(short_code):
         if not content:
             return jsonify({'error': 'Content is required'}), 400
         
-        if len(content) > 400:
-            return jsonify({'error': 'Note exceeds 400 character limit'}), 400
+        if len(content) > 1000:
+            return jsonify({'error': 'Note exceeds 1000 character limit'}), 400
         
         kolkata_tz = pytz.timezone('Asia/Kolkata')
         current_time = datetime.now(kolkata_tz)
@@ -162,6 +162,42 @@ async def add_public_note(short_code):
         print(f"Error adding note: {str(e)}")  # Log the error
         return jsonify({'error': f'An unexpected error occurred: {str(e)}'}), 500
     
+@app.route('/api/public_spaces/<short_code>/notes/<note_id>', methods=['PATCH'])
+async def edit_public_note(short_code, note_id):
+    try:
+        if 'username' not in session:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        space = await public_spaces_collection.find_one({'short_code': short_code})
+        if not space:
+            return jsonify({'error': 'Public space not found'}), 404
+
+        if space.get('locked', False) and space['creator'] != session['username']:
+            return jsonify({'error': 'This space is locked'}), 403
+
+        data = await request.json
+        new_content = data.get('content')
+        if not new_content:
+            return jsonify({'error': 'New content is required'}), 400
+
+        if len(new_content) > 1000:
+            return jsonify({'error': 'Note exceeds 1000 character limit'}), 400
+
+        # Convert note_id from string to ObjectId for querying
+        note_object_id = ObjectId(note_id)
+        # Find and update the specific note
+        result = await public_spaces_collection.update_one(
+            {'short_code': short_code, 'notes._id': note_object_id},
+            {'$set': {'notes.$.content': new_content}}
+        )
+
+        if result.modified_count == 0:
+            return jsonify({'error': 'Note not found or content unchanged'}), 404
+
+        return jsonify({'message': 'Note updated successfully'}), 200
+    except Exception as e:
+        print(f"Error editing note: {str(e)}")  # Log the error
+        return jsonify({'error': f'An unexpected error occurred: {str(e)}'}), 500
 
 @app.route('/api/public_spaces/<short_code>/toggle_lock', methods=['POST'])
 async def toggle_lock(short_code):
