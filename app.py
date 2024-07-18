@@ -22,6 +22,11 @@ public_spaces_collection = db['public_spaces']
 def generate_short_code(length=6):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
+async def is_space_locked(short_code):
+    space = await public_spaces_collection.find_one({'short_code': short_code})
+    return space.get('locked', False) if space else False
+
+# Update the create_public_space function to include the 'locked' field
 @app.route('/api/create_public_space', methods=['POST'])
 async def create_public_space():
     if 'username' not in session:
@@ -40,7 +45,8 @@ async def create_public_space():
         'created_at': datetime.now(pytz.timezone('Asia/Kolkata')),
         'last_updated': datetime.now(pytz.timezone('Asia/Kolkata')),
         'topic_name': topic_name,
-        'notes': []
+        'notes': [],
+        'locked': False  # Add this line
     }
     
     result = await public_spaces_collection.insert_one(new_space)
@@ -123,6 +129,9 @@ async def add_public_note(short_code):
     if not space:
         return jsonify({'error': 'Public space not found'}), 404
     
+    if space.get('locked', False) and space['creator'] != session['username']:
+        return jsonify({'error': 'This space is locked'}), 403
+
     data = await request.json
     content = data.get('content')
     
@@ -150,6 +159,26 @@ async def add_public_note(short_code):
     new_note['_id'] = str(new_note['_id'])
     return jsonify(new_note), 201
 
+@app.route('/api/public_spaces/<short_code>/toggle_lock', methods=['POST'])
+async def toggle_lock(short_code):
+    if 'username' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    space = await public_spaces_collection.find_one({'short_code': short_code})
+    if not space or space['creator'] != session['username']:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    new_lock_status = not space.get('locked', False)
+    result = await public_spaces_collection.update_one(
+        {'short_code': short_code},
+        {'$set': {'locked': new_lock_status}}
+    )
+    
+    if result.modified_count == 0:
+        return jsonify({'error': 'Failed to update lock status'}), 500
+    
+    return jsonify({'locked': new_lock_status}), 200
+
 @app.route('/api/public_spaces/<short_code>/notes', methods=['GET'])
 async def get_public_notes(short_code):
     space = await public_spaces_collection.find_one({'short_code': short_code})
@@ -158,7 +187,9 @@ async def get_public_notes(short_code):
     serialized_notes = [{**note, '_id': str(note['_id'])} for note in space['notes']]
     return jsonify({
         'notes': serialized_notes,
-        'topic': space.get('topic_name', 'Untitled Topic')
+        'topic': space.get('topic_name', 'Untitled Topic'),
+        'locked': space.get('locked', False),
+        'creator': space['creator']
     })
 
 @app.route('/api/public_spaces/<short_code>/notes/<note_id>/like', methods=['POST'])
