@@ -200,6 +200,26 @@
             font-size: 1em;
         }
 
+        .button, button {
+            padding: 8px 15px;
+            background: #a67c52;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .button i, button i {
+            margin-right: 5px;
+        }
+
         footer {
             text-align: center;
             padding: 20px 0;
@@ -224,11 +244,11 @@
         <div class="top-navigation">
             <a href="/" class="logo">Paper Tag</a>
             <div class="button-group">
-                <a href="/spaces" class="button">Back</a>
-                <button id="copy-link-btn">Copy Link</button>
-                <button id="lock-btn" style="display: none;">Lock</button>
-                <button id="login-btn" style="display: none;">Login</button>
-                <button id="delete-space-btn" style="display: none;">Delete</button>
+                <a href="/spaces" class="button"><i class="fas fa-arrow-left"></i> Back</a>
+                <button id="copy-link-btn"><i class="fas fa-copy"></i> Copy Link</button>
+                <button id="lock-btn" style="display: none;"><i class="fas fa-lock"></i> <span>Lock</span></button>
+                <button id="login-btn" style="display: none;"><i class="fas fa-sign-in-alt"></i> Login</button>
+                <button id="delete-space-btn" style="display: none;"><i class="fas fa-trash"></i> Delete</button>
             </div>
         </div>
         <h1>Shared Space</h1>
@@ -299,11 +319,24 @@
             const loginBtn = document.getElementById('login-btn');
             const deleteSpaceBtn = document.getElementById('delete-space-btn');
 
-            lockBtn.style.display = isCreator ? 'inline-block' : 'none';
-            lockBtn.textContent = isLocked ? 'Unlock' : 'Lock';
-            deleteSpaceBtn.style.display = isCreator ? 'inline-block' : 'none';
-            loginBtn.style.display = isLoggedIn ? 'none' : 'inline-block';
-            addNoteForm.style.display = (isLoggedIn && (!isLocked || isCreator)) ? 'block' : 'none';
+            lockBtn.style.display = isCreator ? 'inline-flex' : 'none';
+            if (isLocked) {
+                lockBtn.innerHTML = '<i class="fas fa-unlock"></i> <span>Unlock</span>';
+            } else {
+                lockBtn.innerHTML = '<i class="fas fa-lock"></i> <span>Lock</span>';
+            }
+            deleteSpaceBtn.style.display = isCreator ? 'inline-flex' : 'none';
+            
+            if (isLoggedIn) {
+                loginBtn.style.display = 'none';
+                addNoteForm.style.display = (!isLocked || isCreator) ? 'block' : 'none';
+            } else {
+                loginBtn.style.display = 'inline-flex';
+                addNoteForm.style.display = 'none';
+                if (!isLocked) {
+                    login();
+                }
+            }
         }
 
         function displayNotes(notes) {
@@ -311,7 +344,7 @@
             contentArea.innerHTML = `
                 <div class="add-note-form" style="display: none;">
                     <textarea id="new-note-content" placeholder="Enter your note here (max 400 characters)"></textarea>
-                    <button id="add-note-btn">Add Note</button>
+                    <button id="add-note-btn"><i class="fas fa-plus"></i> Add Note</button>
                 </div>
                 <div class="notes-container">
                     ${notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map(note => `
@@ -333,6 +366,10 @@
 
             document.getElementById('add-note-btn').addEventListener('click', addNote);
             updateUIBasedOnStatus();
+        }
+
+        function login() {
+            window.location.href = `/auth?next=${encodeURIComponent(window.location.pathname)}`;
         }
 
         async function toggleLock() {
@@ -495,6 +532,7 @@
             document.getElementById('edit-topic-btn').addEventListener('click', editTopic);
             fetchSharedSpace();
         });
+
     </script>
 </body>
 </html>
