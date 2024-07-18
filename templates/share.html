@@ -338,6 +338,7 @@
             }
         }
 
+        // Update fetchSharedSpace to use the new error handling
         async function fetchSharedSpace() {
             await checkLoginStatus();
             const contentArea = document.getElementById('content-area');
@@ -357,13 +358,11 @@
                     console.log('Space is hidden, redirecting to /hide');
                     window.location.href = '/hide';
                 } else {
-                    const errorText = await response.text();
-                    console.error('Failed to fetch shared space:', response.status, errorText);
-                    throw new Error(`Failed to fetch shared space: ${response.status} ${errorText}`);
+                    throw new Error(`Failed to fetch shared space: ${response.status}`);
                 }
             } catch (error) {
-                console.error('Error fetching shared space:', error);
-                contentArea.textContent = `An error occurred while fetching the shared space: ${error.message}. Please try refreshing the page.`;
+                handleError(error, 'Error fetching shared space');
+                contentArea.textContent = `An error occurred while fetching the shared space. Please try refreshing the page.`;
             } finally {
                 document.getElementById('loading-screen').style.display = 'none';
             }
@@ -432,7 +431,7 @@
                     </div>
                     <div class="notes-container">
                         ${notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map(note => `
-                            <div class="note">
+                            <div class="note" data-note-id="${note._id}">
                                 <div class="note-username"><i class="fas fa-user"></i> ${note.username}</div>
                                 <div class="note-timestamp"><i class="fas fa-clock"></i> ${note.timestamp}</div>
                                 <div class="note-content"><i class="fas fa-sticky-note"></i> ${formatNoteContent(note.content)}</div>
@@ -440,8 +439,8 @@
                                     <button onclick="likeNote('${note._id}')"><i class="fas fa-thumbs-up"></i> ${note.likes}</button>
                                     <button onclick="dislikeNote('${note._id}')"><i class="fas fa-thumbs-down"></i> ${note.dislikes}</button>
                                     ${(note.username === currentUsername || isCreator) && !isLocked ? `
-                                        <button onclick="editNote('${note._id}')"><i class="fas fa-edit"></i></button>
-                                        <button onclick="deleteNote('${note._id}')"><i class="fas fa-trash"></i></button>
+                                        <button onclick="editNote('${note._id}')"><i class="fas fa-edit"></i> Edit</button>
+                                        <button onclick="deleteNote('${note._id}')"><i class="fas fa-trash"></i> Delete</button>
                                     ` : ''}
                                 </div>
                             </div>
@@ -453,7 +452,7 @@
             document.getElementById('add-note-btn').addEventListener('click', addNote);
             updateUIBasedOnStatus();
         }
-
+        
         function formatNoteContent(content) {
             content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             content = content.replace(/\*(.*?)\*/g, '<em>$1</em>');
@@ -584,7 +583,7 @@
                 return;
             }
             const contentElement = noteElement.querySelector('.note-content');
-            const currentContent = contentElement.textContent;
+            const currentContent = contentElement.textContent.trim();
     
             const textarea = document.createElement('textarea');
             textarea.value = currentContent;
@@ -592,7 +591,7 @@
             textarea.style.height = '100px';
     
             const saveButton = document.createElement('button');
-            saveButton.textContent = 'Save';
+            saveButton.innerHTML = '<i class="fas fa-save"></i> Save';
             saveButton.onclick = async () => {
                 const newContent = textarea.value.trim();
                 if (newContent && newContent !== currentContent) {
@@ -603,7 +602,7 @@
                             body: JSON.stringify({ content: newContent }),
                         });
                         if (response.ok) {
-                            contentElement.innerHTML = formatNoteContent(newContent);
+                            contentElement.innerHTML = `<i class="fas fa-sticky-note"></i> ${formatNoteContent(newContent)}`;
                             noteElement.removeChild(textarea);
                             noteElement.removeChild(saveButton);
                             contentElement.style.display = 'block';
@@ -626,6 +625,7 @@
             noteElement.insertBefore(saveButton, textarea.nextSibling);
             contentElement.style.display = 'none';
         }
+
 
         async function deleteSharedSpace() {
             if (confirm('Are you sure you want to delete this shared space? This action cannot be undone.')) {
