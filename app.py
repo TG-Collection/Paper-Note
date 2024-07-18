@@ -47,7 +47,6 @@ async def toggle_hide_space(short_code):
     
     return jsonify({'hidden': new_hidden_status}), 200
 
-# Update the create_public_space function to include the 'hidden' field
 @app.route('/api/create_public_space', methods=['POST'])
 async def create_public_space():
     if 'username' not in session:
@@ -68,7 +67,7 @@ async def create_public_space():
         'topic_name': topic_name,
         'notes': [],
         'locked': False,
-        'hidden': False  # Add this line
+        'hidden': False
     }
     
     result = await public_spaces_collection.insert_one(new_space)
@@ -201,17 +200,25 @@ async def toggle_lock(short_code):
     
     return jsonify({'locked': new_lock_status}), 200
 
-@app.route('/api/public_spaces/<short_code>/notes', methods=['GET'])
-async def get_public_notes(short_code):
+@app.route('/api/public_spaces/<short_code>/notes')
+async def get_public_space_notes(short_code):
     space = await public_spaces_collection.find_one({'short_code': short_code})
     if not space:
-        return jsonify({'error': 'Public space not found'}), 404
-    serialized_notes = [{**note, '_id': str(note['_id'])} for note in space['notes']]
+        return jsonify({'error': 'Space not found'}), 404
+    
+    is_hidden = space.get('hidden', False)
+    is_creator = session.get('username') == space['creator']
+    
+    if is_hidden and not is_creator:
+        return jsonify({'error': 'Space is hidden'}), 403
+    
+    # Return the space data as before
     return jsonify({
-        'notes': serialized_notes,
-        'topic': space.get('topic_name', 'Untitled Topic'),
-        'locked': space.get('locked', False),
-        'creator': space['creator']
+        'topic': space['topic_name'],
+        'creator': space['creator'],
+        'locked': space['locked'],
+        'hidden': space['hidden'],
+        'notes': space['notes']
     })
 
 @app.route('/api/public_spaces/<short_code>/notes/<note_id>/like', methods=['POST'])
@@ -370,14 +377,16 @@ async def public_space(short_code):
     space = await public_spaces_collection.find_one({'short_code': short_code})
     if not space:
         abort(404)
-    if space.get('hidden', False) and space['creator'] != session.get('username'):
-        return redirect(url_for('hidden_space'))
-    # Check if user is logged in
-    if 'username' not in session:
-        # If not logged in, redirect to the auth page with the current URL as the 'next' parameter
-        return redirect(url_for('auth', next=f'/pub/{short_code}'))
     
-    return await render_template('share.html', space=space)
+    is_hidden = space.get('hidden', False)
+    is_creator = session.get('username') == space['creator']
+    
+    if is_hidden and not is_creator:
+        return await render_template('hide.html')
+    
+    # Render the normal space view
+    return await render_template('share.html', short_code=short_code)
+
 
 @app.route('/auth')
 async def auth():
