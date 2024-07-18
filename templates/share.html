@@ -59,228 +59,35 @@
             z-index: -1;
         }
 
-        .flower-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: url('/static/icon/pattern.png');
-            background-size: cover;
-            background-position: center;
-            opacity: 0.5;
-            z-index: -1;
-            pointer-events: none;
-        }
-
         h1 {
             font-family: 'Playfair Display', serif;
             font-size: 2.5em;
             color: #3a3a3a;
             text-align: center;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            margin: 10px 0;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
-        .shared-note {
-            background: #f4e6c9;
-            border: 1px solid #d3bc8d;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1), 0 0 5px rgba(0, 0, 0, 0.05) inset;
-            border-radius: 5px;
-            padding: 20px;
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .shared-note::before {
-            content: '';
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px double #d3bc8d;
-            background-color: rgba(244, 230, 201, 0.5);
-        }
-
-        .shared-note::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 50%);
-            pointer-events: none;
-        }
-
-        .note-timestamp {
-            font-size: 0.8em;
-            color: #666;
-            font-style: italic;
-            margin-bottom: 10px;
-        }
-
-        .note-content {
-            font-size: 1.1em;
-            line-height: 1.6;
-        }
-
-        .note-username {
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .button {
-            padding: 10px 20px;
-            background: #a67c52;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: background 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-
-        .button:hover {
-            background: #8c6142;
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px 0;
-            font-size: 0.9em;
-            color: #666;
-        }
-
-        footer a {
-            color: #a67c52;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        footer a:hover {
-            color: #8c6142;
-        }
-
-        .add-note-form {
-            margin-top: 20px;
-            background: rgba(255, 255, 240, 0.7);
-            padding: 20px;
-            border-radius: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .add-note-form textarea {
-            width: calc(100% - 40px);
-            height: 100px;
-            margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid #d3bc8d;
-            border-radius: 10px;
-            resize: vertical;
-            font-family: 'Source Sans Pro', sans-serif;
-            font-size: 1em;
-        }
-
-        #add-note-btn {
-            background: #a67c52;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1em;
-            font-weight: 600;
-        }
-
-        #add-note-btn:hover {
-            background: #8c6142;
-            transform: scale(1.05);
-        }
-
-        #add-note-btn:active {
-            transform: scale(0.98);
-        }
-
-        .logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #3a3a3a;
-            text-decoration: none;
-        }
-
-        .notes-container {
-            margin-top: 20px;
-        }
-
-        .note {
-            background: #f4e6c9;
-            border: 1px solid #d3bc8d;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1), 0 0 5px rgba(0, 0, 0, 0.05) inset;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .note-actions {
-            display: flex;
-            justify-content: flex-start;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .note-actions button {
-            background: #a67c52;
-            color: #fff;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9em;
-        }
-
-        .note-actions button:hover {
-            background: #8c6142;
-            transform: scale(1.05);
-        }
-
-        .note-actions button:active {
-            transform: scale(0.98);
-        }
-
-        .note-username {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .note-timestamp {
-            font-size: 0.8em;
-            color: #666;
-            font-style: italic;
-            margin-bottom: 10px;
-        }
-
-        .note-content {
-            font-size: 1em;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-
         .button, button {
+            padding: 8px 15px;
+            background: #a67c52;
+            color: #fff;
+            text-decoration: none;
             border-radius: 25px;
+            font-weight: 600;
             transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .button:hover, button:hover {
+            background: #8c6142;
+            transform: scale(1.05);
+        }
+
+        .button:active, button:active {
+            transform: scale(0.98);
         }
 
         .top-navigation {
@@ -299,29 +106,12 @@
             gap: 10px;
         }
 
-        .top-navigation .button {
-            font-size: 0.9em;
-            padding: 8px 15px;
-        }
-
-        .delete-space-btn {
-            background-color: #966408;
-            color: white;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9em;
-        }
-
-        .delete-space-btn:hover {
-            background-color: #d67c15;
-            transform: scale(1.05);
-        }
-
-        .delete-space-btn:active {
-            transform: scale(0.98);
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #3a3a3a;
+            text-decoration: none;
         }
 
         .topic-container {
@@ -348,89 +138,105 @@
             color: #8c6142;
         }
 
-        #copy-link-btn {
-            background-color: #ffe58e;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .notes-container {
+            margin-top: 20px;
+        }
+
+        .note {
+            background: #f4e6c9;
+            border: 1px solid #d3bc8d;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1), 0 0 5px rgba(0, 0, 0, 0.05) inset;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .note-actions {
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .note-username {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .note-timestamp {
+            font-size: 0.8em;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        .note-content {
+            font-size: 1em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .add-note-form {
+            margin-top: 20px;
+            background: rgba(255, 255, 240, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .add-note-form textarea {
+            width: calc(100% - 40px);
+            height: 100px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #d3bc8d;
+            border-radius: 10px;
+            resize: vertical;
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 1em;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
             font-size: 0.9em;
+            color: #666;
         }
 
-        #copy-link-btn:hover {
-            background-color: #ffdeab;
-            transform: scale(1.05);
+        footer a {
+            color: #a67c52;
+            text-decoration: none;
+            transition: color 0.3s;
         }
 
-        #copy-link-btn:active {
-            transform: scale(0.98);
-        }
-        #lock-btn {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9em;
-        }
-
-        #lock-btn:hover {
-            background-color: #45a049;
-            transform: scale(1.05);
-        }
-
-        #lock-btn:active {
-            transform: scale(0.98);
-        }
-
-        #login-btn {
-            background-color: #008CBA;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9em;
-        }
-
-        #login-btn:hover {
-            background-color: #007B9A;
-            transform: scale(1.05);
-        }
-
-        #login-btn:active {
-            transform: scale(0.98);
+        footer a:hover {
+            color: #8c6142;
         }
     </style>
 </head>
 <body>
     <div class="vintage-background"></div>
     <div class="container">
-        <div class="flower-background"></div>
         <div class="top-navigation">
             <a href="/" class="logo">Paper Tag</a>
             <div class="button-group">
                 <a href="/spaces" class="button">Back</a>
-                <button id="copy-link-btn" class="button">Copy Link</button>
+                <button id="copy-link-btn">Copy Link</button>
                 <button id="lock-btn" style="display: none;">Lock</button>
                 <button id="login-btn" style="display: none;">Login</button>
-                <button id="delete-space-btn" class="delete-space-btn" style="display: none;">Delete</button>
+                <button id="delete-space-btn" style="display: none;">Delete</button>
             </div>
-        </div>
         </div>
         <h1>Shared Space</h1>
         <div class="topic-container">
             <span id="topic-name" class="topic-name"></span>
-            <button class="edit-topic-btn" onclick="editTopic()"><i class="fas fa-edit"></i></button>
+            <button class="edit-topic-btn" id="edit-topic-btn"><i class="fas fa-edit"></i></button>
         </div>
-        <div id="content-area">
-            <!-- Content will be dynamically inserted here -->
-        </div>
+        <div id="content-area"></div>
         <footer>
             <p>© 2024 | Made with ❤️ by <a href="/about" target="_blank">RAZi</a></p>
         </footer>
@@ -458,14 +264,9 @@
                     const data = await response.json();
                     isLoggedIn = data.logged_in;
                     currentUsername = data.username;
-                } else {
-                    isLoggedIn = false;
-                    currentUsername = '';
                 }
             } catch (error) {
                 console.error('Error checking login status:', error);
-                isLoggedIn = false;
-                currentUsername = '';
             }
         }
 
@@ -498,31 +299,14 @@
             const loginBtn = document.getElementById('login-btn');
             const deleteSpaceBtn = document.getElementById('delete-space-btn');
 
-            if (isCreator) {
-                lockBtn.style.display = 'inline-block';
-                lockBtn.textContent = isLocked ? 'Unlock' : 'Lock';
-                deleteSpaceBtn.style.display = 'inline-block';
-            } else {
-                lockBtn.style.display = 'none';
-                deleteSpaceBtn.style.display = 'none';
-            }
-
-            if (isLoggedIn) {
-                loginBtn.style.display = 'none';
-                if (!isLocked || isCreator) {
-                    addNoteForm.style.display = 'block';
-                } else {
-                    addNoteForm.style.display = 'none';
-                }
-            } else {
-                loginBtn.style.display = 'inline-block';
-                addNoteForm.style.display = 'none';
-            }
+            lockBtn.style.display = isCreator ? 'inline-block' : 'none';
+            lockBtn.textContent = isLocked ? 'Unlock' : 'Lock';
+            deleteSpaceBtn.style.display = isCreator ? 'inline-block' : 'none';
+            loginBtn.style.display = isLoggedIn ? 'none' : 'inline-block';
+            addNoteForm.style.display = (isLoggedIn && (!isLocked || isCreator)) ? 'block' : 'none';
         }
 
         function displayNotes(notes) {
-            notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
                 <div class="add-note-form" style="display: none;">
@@ -530,7 +314,7 @@
                     <button id="add-note-btn">Add Note</button>
                 </div>
                 <div class="notes-container">
-                    ${notes.map(note => `
+                    ${notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map(note => `
                         <div class="note">
                             <div class="note-username">${note.username}</div>
                             <div class="note-timestamp">${note.timestamp}</div>
@@ -553,10 +337,7 @@
 
         async function toggleLock() {
             try {
-                const response = await fetch(`/api/public_spaces/${shortCode}/toggle_lock`, {
-                    method: 'POST',
-                });
-
+                const response = await fetch(`/api/public_spaces/${shortCode}/toggle_lock`, { method: 'POST' });
                 if (response.ok) {
                     const data = await response.json();
                     isLocked = data.locked;
@@ -575,6 +356,7 @@
         function login() {
             window.location.href = `/auth?next=${encodeURIComponent(window.location.pathname)}`;
         }
+
         async function deleteNote(noteId) {
             if (!noteId || noteId === 'undefined') {
                 alert('Invalid note ID. Cannot delete note.');
@@ -582,10 +364,7 @@
             }
             if (confirm('Are you sure you want to delete this note?')) {
                 try {
-                    const response = await fetch(`/api/public_spaces/${shortCode}/notes/${noteId}`, {
-                        method: 'DELETE',
-                    });
-
+                    const response = await fetch(`/api/public_spaces/${shortCode}/notes/${noteId}`, { method: 'DELETE' });
                     if (response.ok) {
                         await fetchSharedSpace();
                     } else {
@@ -613,9 +392,7 @@
             try {
                 const response = await fetch(`/api/public_spaces/${shortCode}/notes`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ content }),
                 });
 
@@ -632,28 +409,13 @@
             }
         }
 
-        async function likeNote(noteId) {
-            if (!noteId || noteId === 'undefined') {
-                alert('Invalid note ID. Cannot like note.');
-                return;
-            }
-            await updateNoteLikes(noteId, 'like');
-        }
-
-        async function dislikeNote(noteId) {
-            if (!noteId || noteId === 'undefined') {
-                alert('Invalid note ID. Cannot dislike note.');
-                return;
-            }
-            await updateNoteLikes(noteId, 'dislike');
-        }
-
         async function updateNoteLikes(noteId, action) {
+            if (!noteId || noteId === 'undefined') {
+                alert(`Invalid note ID. Cannot ${action} note.`);
+                return;
+            }
             try {
-                const response = await fetch(`/api/public_spaces/${shortCode}/notes/${noteId}/${action}`, {
-                    method: 'POST',
-                });
-
+                const response = await fetch(`/api/public_spaces/${shortCode}/notes/${noteId}/${action}`, { method: 'POST' });
                 if (response.ok) {
                     await fetchSharedSpace();
                 } else {
@@ -666,13 +428,13 @@
             }
         }
 
+        const likeNote = noteId => updateNoteLikes(noteId, 'like');
+        const dislikeNote = noteId => updateNoteLikes(noteId, 'dislike');
+
         async function deleteSharedSpace() {
             if (confirm('Are you sure you want to delete this shared space? This action cannot be undone.')) {
                 try {
-                    const response = await fetch(`/api/public_spaces/${shortCode}`, {
-                        method: 'DELETE',
-                    });
-
+                    const response = await fetch(`/api/public_spaces/${shortCode}`, { method: 'DELETE' });
                     if (response.ok) {
                         alert('Shared space deleted successfully.');
                         window.location.href = '/spaces';
@@ -688,8 +450,7 @@
         }
 
         function updateTopicDisplay() {
-            const topicNameElement = document.getElementById('topic-name');
-            topicNameElement.textContent = currentTopic || 'Untitled Topic';
+            document.getElementById('topic-name').textContent = currentTopic || 'Untitled Topic';
         }
 
         async function editTopic() {
@@ -698,9 +459,7 @@
                 try {
                     const response = await fetch(`/api/public_spaces/${shortCode}/edit_topic`, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ topic: newTopic.trim() }),
                     });
 
@@ -720,12 +479,12 @@
 
         function copyShareableLink() {
             const shareableLink = `${window.location.origin}/pub/${shortCode}`;
-            navigator.clipboard.writeText(shareableLink).then(() => {
-                alert('Shareable link copied to clipboard!');
-            }).catch(err => {
-                console.error('Error copying link: ', err);
-                alert('Failed to copy link. Please try again.');
-            });
+            navigator.clipboard.writeText(shareableLink)
+                .then(() => alert('Shareable link copied to clipboard!'))
+                .catch(err => {
+                    console.error('Error copying link: ', err);
+                    alert('Failed to copy link. Please try again.');
+                });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -733,8 +492,9 @@
             document.getElementById('copy-link-btn').addEventListener('click', copyShareableLink);
             document.getElementById('lock-btn').addEventListener('click', toggleLock);
             document.getElementById('login-btn').addEventListener('click', login);
+            document.getElementById('edit-topic-btn').addEventListener('click', editTopic);
             fetchSharedSpace();
         });
     </script>
 </body>
-</html>                
+</html>
