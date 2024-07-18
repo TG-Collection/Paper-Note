@@ -205,29 +205,41 @@ async def toggle_lock(short_code):
     
     return jsonify({'locked': new_lock_status}), 200
 
+
 @app.route('/api/public_spaces/<short_code>/notes')
 async def get_public_space_notes(short_code):
-       try:
-           space = await public_spaces_collection.find_one({'short_code': short_code})
-           if not space:
-               return jsonify({'error': 'Space not found'}), 404
-           
-           is_hidden = space.get('hidden', False)
-           is_creator = session.get('username') == space['creator']
-           
-           if is_hidden and not is_creator:
-               return jsonify({'error': 'Space is hidden'}), 403
-           
-           return jsonify({
-               'topic': space['topic_name'],
-               'creator': space['creator'],
-               'locked': space['locked'],
-               'hidden': space['hidden'],
-               'notes': space['notes']
-           })
-       except Exception as e:
-           print(f"Error in get_public_space_notes: {str(e)}")
-           return jsonify({'error': 'An unexpected error occurred'}), 500
+    try:
+        space = await public_spaces_collection.find_one({'short_code': short_code})
+        if not space:
+            return jsonify({'error': 'Space not found'}), 404
+        
+        is_hidden = space.get('hidden', False)
+        is_creator = session.get('username') == space['creator']
+        
+        if is_hidden and not is_creator:
+            return jsonify({'error': 'Space is hidden'}), 403
+        
+        # Convert ObjectId to string if present
+        if '_id' in space:
+            space['_id'] = str(space['_id'])
+        
+        # Ensure any other ObjectId fields are converted to strings
+        # This is just an example for 'notes', adjust according to your actual data structure
+        if 'notes' in space and isinstance(space['notes'], list):
+            for note in space['notes']:
+                if '_id' in note:
+                    note['_id'] = str(note['_id'])
+        
+        return jsonify({
+            'topic': space['topic_name'],
+            'creator': space['creator'],
+            'locked': space['locked'],
+            'hidden': space['hidden'],
+            'notes': space['notes']
+        })
+    except Exception as e:
+        print(f"Error in get_public_space_notes: {str(e)}")
+        return jsonify({'error': 'An unexpected error occurred'}), 500
 
 @app.route('/api/public_spaces/<short_code>/notes/<note_id>/like', methods=['POST'])
 async def like_public_note(short_code, note_id):
