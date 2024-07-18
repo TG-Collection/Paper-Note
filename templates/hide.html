@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hidden Space - Paper Tag</title>
+    <link rel="icon" type="image/png" href="/static/icon/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #d2b48c;
+            color: #3a3a3a;
+        }
+
+        .vintage-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feBlend mode="multiply" in="SourceGraphic" result="monoNoise"/><feColorMatrix in="monoNoise" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.5 0"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.1"/></svg>'), radial-gradient(circle, #d2b48c, #a67c52);
+            background-size: cover;
+            filter: url('#paper-texture');
+            z-index: -1;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: rgba(255, 253, 240, 0.7);
+            border-radius: 15px;
+            box-shadow: 
+                0 4px 6px rgba(0, 0, 0, 0.1), 
+                0 0 20px rgba(0, 0, 0, 0.08) inset,
+                0 10px 20px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="paper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter><rect width="100" height="100" filter="url(%23paper)" opacity="0.1"/></svg>');
+            z-index: -1;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            color: #3a3a3a;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        p {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #a67c52;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .button:hover {
+            background: #8c6142;
+            transform: scale(1.05);
+        }
+
+        .button:active {
+            transform: scale(0.98);
+        }
+
+        footer {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        footer a {
+            color: #a67c52;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: #8c6142;
+        }
+    </style>
+</head>
+<body>
+    <div class="vintage-background"></div>
+    <div class="container">
+        <h1>Hidden Space</h1>
+        <p>This space is currently hidden by its creator. It may be temporarily unavailable or have been removed.</p>
+        <a href="/spaces" class="button">Return to Spaces</a>
+        <footer>
+            <p>© 2024 | Made with ❤️ by <a href="/about" target="_blank">RAZi</a></p>
+        </footer>
+    </div>
+
+    <svg width="0" height="0">
+        <filter id="paper-texture">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5"/>
+            <feDisplacementMap in="SourceGraphic" scale="5"/>
+        </filter>
+    </svg>
+</body>
+</html>

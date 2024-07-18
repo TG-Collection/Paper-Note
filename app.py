@@ -369,8 +369,9 @@ async def api_register():
 async def public_space(short_code):
     space = await public_spaces_collection.find_one({'short_code': short_code})
     if not space:
-        return await render_template('error.html', error_code=404, error_message="Invalid URL", error_description="Public space not found"), 404
-    
+        abort(404)
+    if space.get('hidden', False) and space['creator'] != session.get('username'):
+        return redirect(url_for('hidden_space'))
     # Check if user is logged in
     if 'username' not in session:
         # If not logged in, redirect to the auth page with the current URL as the 'next' parameter
@@ -393,6 +394,10 @@ async def index():
 @app.route('/about')
 async def about():
     return await render_template('about.html')
+
+@app.route('/hide')
+async def hidden_space():
+    return await render_template('hide.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 async def login():
