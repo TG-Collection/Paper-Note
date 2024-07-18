@@ -577,16 +577,20 @@
         const likeNote = noteId => updateNoteLikes(noteId, 'like');
         const dislikeNote = noteId => updateNoteLikes(noteId, 'dislike');
 
-        async function editNote(noteId) {
-            const noteElement = document.querySelector(`[data-note-id="${noteId}"]`);
+        function editNote(noteId) {
+            const noteElement = document.querySelector(`.note[data-note-id="${noteId}"]`);
+            if (!noteElement) {
+                console.error(`Note element with id ${noteId} not found`);
+                return;
+            }
             const contentElement = noteElement.querySelector('.note-content');
             const currentContent = contentElement.textContent;
-            
+    
             const textarea = document.createElement('textarea');
             textarea.value = currentContent;
             textarea.style.width = '100%';
             textarea.style.height = '100px';
-            
+    
             const saveButton = document.createElement('button');
             saveButton.textContent = 'Save';
             saveButton.onclick = async () => {
@@ -602,6 +606,7 @@
                             contentElement.innerHTML = formatNoteContent(newContent);
                             noteElement.removeChild(textarea);
                             noteElement.removeChild(saveButton);
+                            contentElement.style.display = 'block';
                         } else {
                             const error = await response.json();
                             alert(`Failed to update note: ${error.error}`);
@@ -613,9 +618,10 @@
                 } else {
                     noteElement.removeChild(textarea);
                     noteElement.removeChild(saveButton);
+                    contentElement.style.display = 'block';
                 }
             };
-            
+    
             noteElement.insertBefore(textarea, contentElement.nextSibling);
             noteElement.insertBefore(saveButton, textarea.nextSibling);
             contentElement.style.display = 'none';
