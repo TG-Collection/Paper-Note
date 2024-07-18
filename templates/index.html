@@ -52,6 +52,7 @@
             text-align: center;
             margin-bottom: 30px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            padding-top: 40px; /* Added padding to prevent overlap with buttons */
         }
 
         #notes-container {
@@ -63,7 +64,7 @@
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
             display: flex;
-            flex-direction: column-reverse;
+            flex-direction: column;
         }
 
         .note {
@@ -159,13 +160,13 @@
         .action-btn {
             position: absolute;
             top: 10px;
-            padding: 12px 20px;
+            padding: 8px 16px; /* Reduced padding */
             background: var(--primary-color);
             color: #fff;
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px; /* Reduced font size */
             transition: background 0.3s;
         }
 
@@ -237,6 +238,7 @@
 
             h1 {
                 font-size: 2em;
+                padding-top: 60px; /* Increased padding for mobile */
             }
 
             #notes-container {
@@ -259,8 +261,8 @@
             }
 
             .action-btn {
-                font-size: 25px;
-                padding: 8px 12px;
+                font-size: 12px; /* Further reduced font size for mobile */
+                padding: 6px 10px; /* Further reduced padding for mobile */
             }
         }
     </style>
@@ -279,7 +281,7 @@
                 <input type="text" id="note-input" placeholder="Enter note or type / to search..." maxlength="400" required>
                 <span id="char-count">400</span>
                 <button type="submit" id="add-note-btn">
-                    <i class="fas fa-thumbtack"></i>
+                    <i class="fas fa-paper-plane"></i>
                 </button>
             </form>
         </div>
@@ -327,7 +329,6 @@
                 const notes = await response.json();
                 notesContainer.innerHTML = '';
                 notes.forEach(note => notesContainer.appendChild(createNoteElement(note)));
-                notesContainer.scrollTop = notesContainer.scrollHeight;
             } catch (error) {
                 console.error('Error fetching notes:', error);
                 alert('Failed to fetch notes. Please try again.');
@@ -343,8 +344,9 @@
                 });
                 if (!response.ok) throw new Error('Failed to add note');
                 const note = await response.json();
-                notesContainer.appendChild(createNoteElement(note));
-                notesContainer.scrollTop = notesContainer.scrollHeight;
+                const noteEl = createNoteElement(note);
+                notesContainer.appendChild(noteEl);
+                noteEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
             } catch (error) {
                 console.error('Error adding note:', error);
                 alert('Failed to add note. Please try again.');
