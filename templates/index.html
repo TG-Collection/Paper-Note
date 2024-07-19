@@ -313,14 +313,14 @@
                 .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
         }
 
+
         async function fetchNotes(searchQuery = '') {
             try {
                 const response = await fetch(`/api/notes?search=${searchQuery}`);
                 if (!response.ok) throw new Error('Failed to fetch notes');
                 const notes = await response.json();
                 notesContainer.innerHTML = '';
-                notes.forEach(note => notesContainer.appendChild(createNoteElement(note)));
-                scrollToTop();
+                notes.forEach(note => notesContainer.insertBefore(createNoteElement(note), notesContainer.firstChild));
             } catch (error) {
                 console.error('Error fetching notes:', error);
                 alert('Failed to fetch notes. Please try again.');
@@ -337,8 +337,7 @@
                 if (!response.ok) throw new Error('Failed to add note');
                 const note = await response.json();
                 const noteEl = createNoteElement(note);
-                notesContainer.appendChild(noteEl);
-                scrollToTop();
+                notesContainer.insertBefore(noteEl, notesContainer.firstChild);
             } catch (error) {
                 console.error('Error adding note:', error);
                 alert('Failed to add note. Please try again.');
