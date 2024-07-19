@@ -1,4 +1,4 @@
-# Paper Tag
+# Paper Note
 
 Welcome to Paper Tag, a unique web application designed for those who love the vintage aesthetic and the calming effect of breathing animations. Built with the power of Motor and Quart, Paper Tag offers a seamless experience for storing and managing your notes in a style that's both nostalgic and functional.
 
