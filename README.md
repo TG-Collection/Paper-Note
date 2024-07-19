@@ -1,6 +1,6 @@
 # Paper Note
 
-A unique web application designed for those who love the vintage aesthetic 
+### A unique web application designed for those who love the vintage aesthetic 
 
 ## Features
 
