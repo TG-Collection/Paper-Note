@@ -289,6 +289,7 @@
         const charCount = document.getElementById('char-count');
         const loadingScreen = document.getElementById('loading-screen');
 
+
         function createNoteElement(note) {
             const noteEl = document.createElement('div');
             noteEl.className = 'note';
@@ -335,17 +336,13 @@
                     body: JSON.stringify({ content }),
                 });
                 if (!response.ok) throw new Error('Failed to add note');
-                const note = await response.json();
-                const noteEl = createNoteElement(note);
-                notesContainer.insertBefore(noteEl, notesContainer.firstChild);
+                
+                // Refresh the page after successfully adding a note
+                window.location.reload();
             } catch (error) {
                 console.error('Error adding note:', error);
                 alert('Failed to add note. Please try again.');
             }
-        }
-
-        function scrollToBottom() {
-            notesContainer.scrollTop = notesContainer.scrollHeight;
         }
 
         function scrollToTop() {
@@ -373,6 +370,10 @@
             charCount.textContent = remainingChars;
             charCount.style.color = remainingChars < 50 ? 'red' : '#666';
         });
+
+        function scrollToBottom() {
+            window.scrollTo(0, document.body.scrollHeight);
+        }
 
         addNoteForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -403,6 +404,8 @@
                 if (data.logged_in) {
                     mainContainer.style.display = 'block';
                     await fetchNotes();
+                    // Scroll to bottom after fetching notes
+                    scrollToBottom();
                 } else {
                     window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
                 }
@@ -413,6 +416,7 @@
                 loadingScreen.style.display = 'none';
             }
         }
+
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
             try {
