@@ -526,6 +526,10 @@ def get_service_running_time():
     running_time = time.time() - start_time
     return str(timedelta(seconds=int(running_time)))
 
+@app.route('/status')
+async def status():
+    return await render_template('status.html')
+
 @app.route('/api/status')
 async def api_status():
     # Fetch data from MongoDB
