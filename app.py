@@ -526,8 +526,8 @@ def get_service_running_time():
     running_time = time.time() - start_time
     return str(timedelta(seconds=int(running_time)))
 
-@app.route('/status')
-async def status():
+@app.route('/api/status')
+async def api_status():
     # Fetch data from MongoDB
     total_users = await users_collection.count_documents({})
     total_spaces = await public_spaces_collection.count_documents({})
@@ -535,7 +535,7 @@ async def status():
     cpu_load = psutil.cpu_percent()
     ram_usage = psutil.virtual_memory().percent
     disk_usage = psutil.disk_usage('/').percent
-    # Get MongoDB storage info (this is an estimate, might need adjustment based on your setup)
+    # Get MongoDB storage info
     storage_size = await db.command("dbStats")
     mongodb_storage = storage_size['storageSize'] / (1024 * 1024)  # Convert to MB
     # Get IP address info
@@ -557,10 +557,7 @@ async def status():
         'ram_usage': f"{ram_usage:.1f}%",
         'disk_usage': f"{disk_usage:.1f}%"
     }
-    return await render_template('status.html', status=status_data)
-
-
-
+    return jsonify(status_data)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 10000)))

@@ -46,36 +46,58 @@
         <h1>Service Status</h1>
         <div class="status-item">
             <span class="status-label">Total Registered Users:</span>
-            <span class="status-value">{{ status.total_users }}</span>
+            <span class="status-value" id="total_users"></span>
         </div>
         <div class="status-item">
             <span class="status-label">Current IP:</span>
-            <span class="status-value">{{ status.current_ip }}</span>
+            <span class="status-value" id="current_ip"></span>
         </div>
         <div class="status-item">
             <span class="status-label">MongoDB Storage:</span>
-            <span class="status-value">{{ status.mongodb_storage }}</span>
+            <span class="status-value" id="mongodb_storage"></span>
         </div>
         <div class="status-item">
             <span class="status-label">Total Generated Spaces:</span>
-            <span class="status-value">{{ status.total_spaces }}</span>
+            <span class="status-value" id="total_spaces"></span>
         </div>
         <div class="status-item">
             <span class="status-label">Service Running Time:</span>
-            <span class="status-value">{{ status.service_running_time }}</span>
+            <span class="status-value" id="service_running_time"></span>
         </div>
         <div class="status-item">
             <span class="status-label">CPU Load:</span>
-            <span class="status-value">{{ status.cpu_load }}</span>
+            <span class="status-value" id="cpu_load"></span>
         </div>
         <div class="status-item">
             <span class="status-label">RAM Usage:</span>
-            <span class="status-value">{{ status.ram_usage }}</span>
+            <span class="status-value" id="ram_usage"></span>
         </div>
         <div class="status-item">
             <span class="status-label">Disk Usage:</span>
-            <span class="status-value">{{ status.disk_usage }}</span>
+            <span class="status-value" id="disk_usage"></span>
         </div>
     </div>
+
+    <script>
+        function updateStatus() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('total_users').textContent = data.total_users;
+                    document.getElementById('current_ip').textContent = data.current_ip;
+                    document.getElementById('mongodb_storage').textContent = data.mongodb_storage;
+                    document.getElementById('total_spaces').textContent = data.total_spaces;
+                    document.getElementById('service_running_time').textContent = data.service_running_time;
+                    document.getElementById('cpu_load').textContent = data.cpu_load;
+                    document.getElementById('ram_usage').textContent = data.ram_usage;
+                    document.getElementById('disk_usage').textContent = data.disk_usage;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Update status immediately and then every 2 seconds
+        updateStatus();
+        setInterval(updateStatus, 2000);
+    </script>
 </body>
 </html>
