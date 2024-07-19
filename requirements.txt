@@ -2,3 +2,4 @@ quart
 motor
 Werkzeug
 pytz
+psutil
