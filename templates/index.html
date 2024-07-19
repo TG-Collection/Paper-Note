@@ -57,6 +57,11 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
         #notes-container {
             flex-grow: 1;
             overflow-y: auto;
@@ -81,10 +86,19 @@
             font-size: 0.7em;
             color: #666;
             font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .note-content {
             transition: transform 0.3s ease;
+        }
+
+        .note-text {
+            display: flex;
+            align-items: flex-start;
+            gap: 5px;
         }
 
         .delete-area {
@@ -167,13 +181,13 @@
         }
 
         .action-btn {
-            padding: 8px 16px;
+            padding: 10px 20px;
             background: var(--primary-color);
             color: #fff;
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             transition: background 0.3s;
             margin: 0 5px;
         }
@@ -230,8 +244,8 @@
             }
 
             .action-btn {
-                font-size: 12px;
-                padding: 6px 10px;
+                font-size: 14px;
+                padding: 8px 12px;
             }
 
             #add-note-form {
@@ -256,7 +270,7 @@
     <div class="container">
         <div class="top-section">
             <h1>Paper Tag</h1>
-            <div>
+            <div class="button-container">
                 <button id="logout-btn" class="action-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
                 <button id="all-spaces-btn" class="action-btn"><i class="fas fa-th"></i> My Spaces</button>
             </div>
@@ -283,8 +297,8 @@
             noteEl.className = 'note';
             noteEl.innerHTML = `
                 <div class="note-content">
-                    <div class="note-timestamp">${note.timestamp}</div>
-                    <div class="note-text">${formatText(note.content)}</div>
+                    <div class="note-timestamp"><i class="fas fa-clock"></i> ${note.timestamp}</div>
+                    <div class="note-text"><i class="fas fa-sticky-note"></i> ${formatText(note.content)}</div>
                 </div>
                 <div class="delete-area">
                     <i class="fas fa-trash-alt"></i>
@@ -300,12 +314,11 @@
             });
 
             noteEl.addEventListener('touchmove', (e) => {
-                if (isSwiping) return;
                 moveX = e.touches[0].clientX;
                 const diff = startX - moveX;
-                if (diff > 50) {
-                    noteEl.classList.add('swiping');
-                    isSwiping = true;
+                if (Math.abs(diff) > 50) {
+                    noteEl.classList.toggle('swiping', diff > 0);
+                    isSwiping = diff > 0;
                 }
             });
 
