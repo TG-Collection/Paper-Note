@@ -294,15 +294,47 @@
             const noteEl = document.createElement('div');
             noteEl.className = 'note';
             noteEl.innerHTML = `
-                <div class="note-timestamp">${note.timestamp}</div>
-                <div class="note-content">${formatText(note.content)}</div>
-                <div class="note-actions">
-                    <button class="delete-btn" data-id="${note._id}"><i class="fas fa-trash-alt"></i></button>
+                <div class="note-content">
+                    <div class="note-timestamp">${note.timestamp}</div>
+                    <div class="note-text">${formatText(note.content)}</div>
+                </div>
+                <div class="delete-area">
+                    <i class="fas fa-trash-alt"></i>
                 </div>
             `;
+            noteEl.dataset.id = note._id;
+            
+            let startX, moveX;
+            let isSwiping = false;
+
+            noteEl.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+            });
+
+            noteEl.addEventListener('touchmove', (e) => {
+                if (isSwiping) return;
+                moveX = e.touches[0].clientX;
+                const diff = startX - moveX;
+                if (diff > 50) {
+                    noteEl.classList.add('swiping');
+                    isSwiping = true;
+                }
+            });
+
+            noteEl.addEventListener('touchend', () => {
+                if (isSwiping) {
+                    const deleteArea = noteEl.querySelector('.delete-area');
+                    deleteArea.addEventListener('click', async () => {
+                        await deleteNote(note._id);
+                    });
+                }
+                startX = null;
+                moveX = null;
+            });
+
             return noteEl;
         }
-
+        
         function formatText(text) {
             return text
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -353,11 +385,10 @@
             try {
                 const response = await fetch(`/api/notes/${noteId}`, { method: 'DELETE' });
                 if (!response.ok) throw new Error('Failed to delete note');
-                const noteEl = document.querySelector(`.delete-btn[data-id="${noteId}"]`).closest('.note');
-                noteEl.style.opacity = '0';
+                const noteEl = document.querySelector(`.note[data-id="${noteId}"]`);
+                noteEl.classList.add('deleting');
                 setTimeout(() => {
                     noteEl.remove();
-                    scrollToTop();
                 }, 300);
             } catch (error) {
                 console.error('Error deleting note:', error);
