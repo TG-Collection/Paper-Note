@@ -277,8 +277,8 @@
         </div>
         <div id="notes-container"></div>
         <form id="add-note-form">
-            <input type="text" id="note-input" placeholder="Enter note or type / to search..." maxlength="400" required>
-            <span id="char-count">400</span>
+            <input type="text" id="note-input" placeholder="Enter note or type / to search..." maxlength="1000" required>
+            <span id="char-count">1000</span>
             <button type="submit" id="add-note-btn">
                 <i class="fas fa-paper-plane"></i>
             </button>
@@ -398,7 +398,7 @@
         }
 
         noteInput.addEventListener('input', function() {
-            const remainingChars = 400 - this.value.length;
+            const remainingChars = 1000 - this.value.length;
             charCount.textContent = remainingChars;
             charCount.style.color = remainingChars < 50 ? 'red' : '#666';
         });
@@ -412,7 +412,7 @@
                 await addNote(inputValue);
             }
             noteInput.value = '';
-            charCount.textContent = '400';
+            charCount.textContent = '1000';
         });
 
         async function checkLoginStatus() {

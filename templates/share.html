@@ -409,7 +409,7 @@
             if (notes.length === 0) {
                 contentArea.innerHTML = `
                     <div class="add-note-form" style="display: none;">
-                        <textarea id="new-note-content" placeholder="Enter your note here (max 400 characters)"></textarea>
+                        <textarea id="new-note-content" placeholder="Enter your note here (max 1000 characters)"></textarea>
                         <button id="add-note-btn"><i class="fas fa-plus"></i> Add Note</button>
                     </div>
                     <div class="no-notes-message">
@@ -426,7 +426,7 @@
             } else {
                 contentArea.innerHTML = `
                     <div class="add-note-form" style="display: none;">
-                        <textarea id="new-note-content" placeholder="Enter your note here (max 400 characters)"></textarea>
+                        <textarea id="new-note-content" placeholder="Enter your note here (max 1000 characters)"></textarea>
                         <button id="add-note-btn"><i class="fas fa-plus"></i> Add Note</button>
                     </div>
                     <div class="notes-container">
@@ -529,8 +529,8 @@
                 alert('Please enter a note.');
                 return;
             }
-            if (content.length > 400) {
-                alert('Note exceeds 400 character limit.');
+            if (content.length > 1000) {
+                alert('Note exceeds 1000 character limit.');
                 return;
             }
 

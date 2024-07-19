@@ -393,9 +393,9 @@ async def add_note():
     data = await request.json
     content = data['content']
     
-    # Check word limit (approximately 400 characters)
-    if len(content) > 400:
-        return jsonify({'error': 'Note exceeds 400 character limit'}), 400
+    # Check word limit (approximately 1000 characters)
+    if len(content) > 1000:
+        return jsonify({'error': 'Note exceeds 1000 character limit'}), 400
     
     kolkata_tz = pytz.timezone('Asia/Kolkata')
     current_time = datetime.now(kolkata_tz)
