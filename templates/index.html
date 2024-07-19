@@ -24,37 +24,37 @@
             padding: 0;
         }
 
-        body {
+        body, html {
             font-family: 'Source Sans Pro', sans-serif;
             background: var(--secondary-color);
             color: var(--text-color);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
         }
 
         .container {
-            flex-grow: 1;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255, 253, 240, 0.7);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 0 20px rgba(0, 0, 0, 0.08) inset;
-            padding: 40px 20px;
-            position: relative;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
+            height: 100%;
+            background: rgba(255, 253, 240, 0.7);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 0 20px rgba(0, 0, 0, 0.08) inset;
+        }
+
+        .top-section {
+            flex-shrink: 0;
+            padding: 20px;
+            background: var(--background-color);
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 2.5em;
+            font-size: 2em;
             color: var(--text-color);
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-            padding-top: 40px;
         }
 
         #notes-container {
@@ -63,7 +63,6 @@
             padding: 20px;
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
-            margin-bottom: 80px; /* Space for the floating input */
         }
 
         .note {
@@ -74,6 +73,8 @@
             margin-bottom: 15px;
             position: relative;
             transition: all 0.3s ease;
+            touch-action: pan-y;
+            overflow: hidden;
         }
 
         .note-timestamp {
@@ -83,37 +84,48 @@
         }
 
         .note-content {
-            margin-top: 10px;
+            transition: transform 0.3s ease;
         }
 
-        .note-actions {
-            text-align: right;
-            margin-top: 10px;
+        .delete-area {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ff6b6b;
+            color: white;
+            width: 70px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
         }
 
-        .delete-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--primary-color);
-            transition: color 0.2s;
+        .note.swiping .note-content {
+            transform: translateX(-70px);
         }
 
-        .delete-btn:hover {
-            color: #8c6142;
+        .note.swiping .delete-area {
+            transform: translateX(0);
+        }
+
+        .note.deleting {
+            height: 0;
+            margin: 0;
+            padding: 0;
+            opacity: 0;
         }
 
         #add-note-form {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            flex-shrink: 0;
             background: var(--background-color);
             padding: 10px 20px;
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
             display: flex;
             gap: 10px;
             align-items: center;
+            z-index: 10;
         }
 
         #note-input {
@@ -132,6 +144,12 @@
             box-shadow: 0 0 5px rgba(166, 124, 82, 0.5);
         }
 
+        #char-count {
+            font-size: 0.8em;
+            color: #666;
+            margin-right: 10px;
+        }
+
         #add-note-btn {
             padding: 10px 20px;
             background: var(--primary-color);
@@ -148,15 +166,7 @@
             background: #8c6142;
         }
 
-        #char-count {
-            font-size: 0.8em;
-            color: #666;
-            margin-right: 10px;
-        }
-
         .action-btn {
-            position: absolute;
-            top: 10px;
             padding: 8px 16px;
             background: var(--primary-color);
             color: #fff;
@@ -165,10 +175,8 @@
             cursor: pointer;
             font-size: 14px;
             transition: background 0.3s;
+            margin: 0 5px;
         }
-
-        #logout-btn { right: 10px; }
-        #all-spaces-btn { left: 10px; }
 
         .action-btn:hover {
             background: #8c6142;
@@ -201,23 +209,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        footer {
-            text-align: center;
-            padding: 20px 0;
-            font-size: 0.9em;
-            color: #666;
-            background: var(--background-color);
-        }
-
-        footer a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            color: #8c6142;
-        }
-
         .hashtag {
             color: var(--primary-color);
             font-weight: bold;
@@ -229,13 +220,13 @@
         }
 
         @media (max-width: 768px) {
-            .container {
-                padding: 20px 10px;
+            .top-section {
+                padding: 10px;
             }
 
             h1 {
-                font-size: 2em;
-                padding-top: 60px;
+                font-size: 1.5em;
+                margin-bottom: 10px;
             }
 
             .action-btn {
@@ -263,32 +254,29 @@
         <div class="spinner"></div>
     </div>
     <div class="container">
-        <h1>Paper Tag</h1>
-        <div id="main-container" style="display: none;">
-            <button id="logout-btn" class="action-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
-            <button id="all-spaces-btn" class="action-btn"><i class="fas fa-th"></i> My Spaces</button>
-            <div id="notes-container"></div>
+        <div class="top-section">
+            <h1>Paper Tag</h1>
+            <div>
+                <button id="logout-btn" class="action-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                <button id="all-spaces-btn" class="action-btn"><i class="fas fa-th"></i> My Spaces</button>
+            </div>
         </div>
+        <div id="notes-container"></div>
+        <form id="add-note-form">
+            <input type="text" id="note-input" placeholder="Enter note or type / to search..." maxlength="400" required>
+            <span id="char-count">400</span>
+            <button type="submit" id="add-note-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </form>
     </div>
-    <form id="add-note-form">
-        <input type="text" id="note-input" placeholder="Enter note or type / to search..." maxlength="400" required>
-        <span id="char-count">400</span>
-        <button type="submit" id="add-note-btn">
-            <i class="fas fa-paper-plane"></i>
-        </button>
-    </form>
-    <footer>
-        <p>© 2024 | Made with <i class="fas fa-heart" style="color: var(--primary-color);"></i> by <a href="/about" target="_blank">RAZi</a></p>
-    </footer>
 
     <script>
-        const mainContainer = document.getElementById('main-container');
         const notesContainer = document.getElementById('notes-container');
         const addNoteForm = document.getElementById('add-note-form');
         const noteInput = document.getElementById('note-input');
         const charCount = document.getElementById('char-count');
         const loadingScreen = document.getElementById('loading-screen');
-
 
         function createNoteElement(note) {
             const noteEl = document.createElement('div');
@@ -334,7 +322,7 @@
 
             return noteEl;
         }
-        
+
         function formatText(text) {
             return text
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -345,7 +333,6 @@
                 .replace(/@(\w+)/g, '<span class="mention">@$1</span>')
                 .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
         }
-
 
         async function fetchNotes(searchQuery = '') {
             try {
@@ -369,16 +356,13 @@
                 });
                 if (!response.ok) throw new Error('Failed to add note');
                 
-                // Refresh the page after successfully adding a note
-                window.location.reload();
+                // Fetch notes again instead of refreshing the whole page
+                await fetchNotes();
+                scrollToBottom();
             } catch (error) {
                 console.error('Error adding note:', error);
                 alert('Failed to add note. Please try again.');
             }
-        }
-
-        function scrollToTop() {
-            notesContainer.scrollTop = 0;
         }
 
         async function deleteNote(noteId) {
@@ -396,15 +380,15 @@
             }
         }
 
+        function scrollToBottom() {
+            notesContainer.scrollTop = notesContainer.scrollHeight;
+        }
+
         noteInput.addEventListener('input', function() {
             const remainingChars = 400 - this.value.length;
             charCount.textContent = remainingChars;
             charCount.style.color = remainingChars < 50 ? 'red' : '#666';
         });
-
-        function scrollToBottom() {
-            window.scrollTo(0, document.body.scrollHeight);
-        }
 
         addNoteForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -418,25 +402,13 @@
             charCount.textContent = '400';
         });
 
-        notesContainer.addEventListener('click', async (e) => {
-            if (e.target.closest('.delete-btn')) {
-                const noteId = e.target.closest('.delete-btn').dataset.id;
-                if (confirm('Are you sure you want to delete this note?')) {
-                    await deleteNote(noteId);
-                }
-            }
-        });
-
         async function checkLoginStatus() {
             try {
                 const response = await fetch('/api/check_login');
                 if (!response.ok) throw new Error('Failed to check login status');
                 const data = await response.json();
                 if (data.logged_in) {
-                    mainContainer.style.display = 'block';
                     await fetchNotes();
-                    // Scroll to bottom after fetching notes
-                    scrollToBottom();
                 } else {
                     window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
                 }
@@ -447,7 +419,6 @@
                 loadingScreen.style.display = 'none';
             }
         }
-
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
             try {
