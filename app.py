@@ -453,11 +453,6 @@ async def logout():
     session.pop('username', None)
     return redirect(url_for('login'))
 
-@app.route('/auth')
-async def auth():
-    next_url = request.args.get('next', '/')
-    return await render_template('auth.html', next_url=next_url)
-
 @app.route('/')
 async def index():
     if 'username' not in session:
