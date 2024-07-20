@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vintage Paper Tag</title>
+    <title>Vintage Paper Note</title>
     <link rel="icon" type="image/png" href="/static/icon/logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -150,6 +150,9 @@
             font-size: 16px;
             background: var(--background-color);
             transition: all 0.3s ease;
+            resize: vertical;
+            min-height: 40px;
+            max-height: 200px;
         }
 
         #note-input:focus {
@@ -253,10 +256,6 @@
                 border-radius: 25px;
             }
 
-            #note-input {
-                font-size: 14px;
-            }
-
             #add-note-btn {
                 padding: 8px 16px;
                 font-size: 14px;
@@ -287,7 +286,7 @@
     </div>
     <div class="container">
         <div class="top-section">
-            <h1>Paper Tag</h1>
+            <h1>Paper Note</h1>
             <div class="button-container">
                 <button id="logout-btn" class="action-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
                 <button id="all-spaces-btn" class="action-btn"><i class="fas fa-th"></i> Spaces</button>
@@ -295,7 +294,7 @@
         </div>
         <div id="notes-container"></div>
         <form id="add-note-form">
-            <input type="text" id="note-input" placeholder="Enter note or type / to search..." maxlength="1000" required>
+            <textarea id="note-input" placeholder="Enter note or type / to search..." maxlength="1000" required></textarea>
             <span id="char-count">1000</span>
             <button type="submit" id="add-note-btn">
                 <i class="fas fa-paper-plane"></i>
@@ -365,7 +364,8 @@
                 .replace(/~~(.*?)~~/g, '<del>$1</del>')
                 .replace(/#(\w+)/g, '<span class="hashtag">#$1</span>')
                 .replace(/@(\w+)/g, '<span class="mention">@$1</span>')
-                .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+                .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>')
+                .replace(/\n/g, '<br>'); // Add this line to replace newlines with <br> tags
         }
 
         async function fetchNotes(searchQuery = '') {
@@ -422,6 +422,10 @@
             const remainingChars = 1000 - this.value.length;
             charCount.textContent = remainingChars;
             charCount.style.color = remainingChars < 50 ? 'red' : '#666';
+            
+            // Adjust textarea height
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
         });
 
         addNoteForm.addEventListener('submit', async (e) => {
@@ -434,6 +438,7 @@
             }
             noteInput.value = '';
             charCount.textContent = '1000';
+            noteInput.style.height = 'auto'; // Reset height after submission
         });
 
         async function checkLoginStatus() {
