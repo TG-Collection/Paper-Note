@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vintage Paper Tag</title>
+    <title>Vintage Paper Note</title>
     <link rel="icon" type="image/png" href="/static/icon/logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -286,7 +286,7 @@
     </div>
     <div class="container">
         <div class="top-section">
-            <h1>Paper Tag</h1>
+            <h1>Paper Note</h1>
             <div class="button-container">
                 <button id="logout-btn" class="action-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
                 <button id="all-spaces-btn" class="action-btn"><i class="fas fa-th"></i> Spaces</button>
@@ -440,7 +440,7 @@
             charCount.textContent = '1000';
             noteInput.style.height = 'auto'; // Reset height after submission
         });
-        
+
         async function checkLoginStatus() {
             try {
                 const response = await fetch('/api/check_login');
