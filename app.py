@@ -257,35 +257,48 @@ async def add_public_note(short_code):
 
 @app.route('/api/public_spaces/<short_code>/notes/<int:note_id>', methods=['PATCH'])
 async def edit_public_note(short_code, note_id):
+    logger.info(f"Attempting to edit note {note_id} in space {short_code}")
     if 'username' not in session:
+        logger.warning(f"Unauthorized edit attempt for note {note_id}")
         return jsonify({'error': 'Unauthorized'}), 401
 
     async with async_session() as sess:
-        space = await sess.execute(select(PublicSpace).filter_by(short_code=short_code))
-        space = space.scalar_one_or_none()
-        if not space:
-            return jsonify({'error': 'Public space not found'}), 404
+        try:
+            space = await sess.execute(select(PublicSpace).filter_by(short_code=short_code))
+            space = space.scalar_one_or_none()
+            if not space:
+                logger.warning(f"Public space {short_code} not found")
+                return jsonify({'error': 'Public space not found'}), 404
 
-        if space.locked and space.creator != session['username']:
-            return jsonify({'error': 'This space is locked'}), 403
+            if space.locked and space.creator != session['username']:
+                logger.warning(f"Edit attempt on locked space {short_code} by non-creator {session['username']}")
+                return jsonify({'error': 'This space is locked'}), 403
 
-        data = await request.json
-        new_content = data.get('content')
-        if not new_content:
-            return jsonify({'error': 'New content is required'}), 400
+            data = await request.json
+            new_content = data.get('content')
+            if not new_content:
+                logger.warning("Edit attempt with empty content")
+                return jsonify({'error': 'New content is required'}), 400
 
-        if len(new_content) > 1000:
-            return jsonify({'error': 'Note exceeds 1000 character limit'}), 400
+            if len(new_content) > 1000:
+                logger.warning("Edit attempt with content exceeding 1000 characters")
+                return jsonify({'error': 'Note exceeds 1000 character limit'}), 400
 
-        note = await sess.execute(select(Note).filter_by(id=note_id, space_id=space.id))
-        note = note.scalar_one_or_none()
-        if not note or note.username != session['username']:
-            return jsonify({'error': 'Note not found or you do not have permission to edit it'}), 404
+            note = await sess.execute(select(Note).filter_by(id=note_id, space_id=space.id))
+            note = note.scalar_one_or_none()
+            if not note or note.username != session['username']:
+                logger.warning(f"Note {note_id} not found or user {session['username']} doesn't have permission to edit it")
+                return jsonify({'error': 'Note not found or you do not have permission to edit it'}), 404
 
-        note.content = new_content
-        await sess.commit()
+            note.content = new_content
+            await sess.commit()
+            logger.info(f"Note {note_id} successfully edited by user {session['username']}")
+        except Exception as e:
+            logger.error(f"Error editing note {note_id}: {str(e)}")
+            return jsonify({'error': 'An error occurred while editing the note'}), 500
 
     return jsonify({'message': 'Note updated successfully'}), 200
+
 
 @app.route('/api/public_spaces/<short_code>/toggle_lock', methods=['POST'])
 async def toggle_lock(short_code):
@@ -337,53 +350,77 @@ async def get_public_space_notes(short_code):
 
 @app.route('/api/public_spaces/<short_code>/notes/<int:note_id>/like', methods=['POST'])
 async def like_public_note(short_code, note_id):
+    logger.info(f"Attempting to like note {note_id} in space {short_code}")
     if 'username' not in session:
+        logger.warning(f"Unauthorized like attempt for note {note_id}")
         return jsonify({'error': 'Unauthorized'}), 401
     
     async with async_session() as sess:
-        note = await sess.execute(select(Note).join(PublicSpace).filter(PublicSpace.short_code == short_code, Note.id == note_id))
-        note = note.scalar_one_or_none()
-        if not note:
-            return jsonify({'error': 'Note not found'}), 404
-        
-        note.likes += 1
-        await sess.commit()
+        try:
+            note = await sess.execute(select(Note).join(PublicSpace).filter(PublicSpace.short_code == short_code, Note.id == note_id))
+            note = note.scalar_one_or_none()
+            if not note:
+                logger.warning(f"Note {note_id} not found for liking")
+                return jsonify({'error': 'Note not found'}), 404
+            
+            note.likes += 1
+            await sess.commit()
+            logger.info(f"Note {note_id} successfully liked by user {session['username']}")
+        except Exception as e:
+            logger.error(f"Error liking note {note_id}: {str(e)}")
+            return jsonify({'error': 'An error occurred while liking the note'}), 500
     
     return '', 204
 
 @app.route('/api/public_spaces/<short_code>/notes/<int:note_id>/dislike', methods=['POST'])
 async def dislike_public_note(short_code, note_id):
+    logger.info(f"Attempting to dislike note {note_id} in space {short_code}")
     if 'username' not in session:
+        logger.warning(f"Unauthorized dislike attempt for note {note_id}")
         return jsonify({'error': 'Unauthorized'}), 401
     
     async with async_session() as sess:
-        note = await sess.execute(select(Note).join(PublicSpace).filter(PublicSpace.short_code == short_code, Note.id == note_id))
-        note = note.scalar_one_or_none()
-        if not note:
-            return jsonify({'error': 'Note not found'}), 404
-        
-        note.dislikes += 1
-        await sess.commit()
+        try:
+            note = await sess.execute(select(Note).join(PublicSpace).filter(PublicSpace.short_code == short_code, Note.id == note_id))
+            note = note.scalar_one_or_none()
+            if not note:
+                logger.warning(f"Note {note_id} not found for disliking")
+                return jsonify({'error': 'Note not found'}), 404
+            
+            note.dislikes += 1
+            await sess.commit()
+            logger.info(f"Note {note_id} successfully disliked by user {session['username']}")
+        except Exception as e:
+            logger.error(f"Error disliking note {note_id}: {str(e)}")
+            return jsonify({'error': 'An error occurred while disliking the note'}), 500
     
     return '', 204
 
 @app.route('/api/public_spaces/<short_code>/notes/<int:note_id>', methods=['DELETE'])
 async def delete_public_note(short_code, note_id):
+    logger.info(f"Attempting to delete note {note_id} in space {short_code}")
     if 'username' not in session:
+        logger.warning(f"Unauthorized delete attempt for note {note_id}")
         return jsonify({'error': 'Unauthorized'}), 401
     
     async with async_session() as sess:
-        note = await sess.execute(select(Note).join(PublicSpace).filter(
-            PublicSpace.short_code == short_code,
-            Note.id == note_id,
-            Note.username == session['username']
-        ))
-        note = note.scalar_one_or_none()
-        if not note:
-            return jsonify({'error': 'Note not found or you do not have permission to delete it'}), 404
-        
-        await sess.delete(note)
-        await sess.commit()
+        try:
+            note = await sess.execute(select(Note).join(PublicSpace).filter(
+                PublicSpace.short_code == short_code,
+                Note.id == note_id,
+                Note.username == session['username']
+            ))
+            note = note.scalar_one_or_none()
+            if not note:
+                logger.warning(f"Note {note_id} not found or user {session['username']} doesn't have permission to delete it")
+                return jsonify({'error': 'Note not found or you do not have permission to delete it'}), 404
+            
+            await sess.delete(note)
+            await sess.commit()
+            logger.info(f"Note {note_id} successfully deleted by user {session['username']}")
+        except Exception as e:
+            logger.error(f"Error deleting note {note_id}: {str(e)}")
+            return jsonify({'error': 'An error occurred while deleting the note'}), 500
     
     return '', 204
 
