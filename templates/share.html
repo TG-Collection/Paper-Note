@@ -431,27 +431,46 @@
                     </div>
                     <div class="notes-container">
                         ${notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map(note => `
-                            <div class="note" data-note-id="${note._id}">
-                                <div class="note-username"><i class="fas fa-user"></i> ${note.username}</div>
-                                <div class="note-timestamp"><i class="fas fa-clock"></i> ${note.timestamp}</div>
-                                <div class="note-content"><i class="fas fa-sticky-note"></i> ${formatNoteContent(note.content)}</div>
+                            <div class="note" data-note-id="${note._id || ''}">
+                                <div class="note-username"><i class="fas fa-user"></i> ${escapeHtml(note.username || '')}</div>
+                                <div class="note-timestamp"><i class="fas fa-clock"></i> ${note.timestamp || ''}</div>
+                                <div class="note-content"><i class="fas fa-sticky-note"></i> ${formatNoteContent(note.content || '')}</div>
                                 <div class="note-actions">
-                                    <button onclick="likeNote('${note._id}')"><i class="fas fa-thumbs-up"></i> ${note.likes}</button>
-                                    <button onclick="dislikeNote('${note._id}')"><i class="fas fa-thumbs-down"></i> ${note.dislikes}</button>
+                                    <button class="like-btn"><i class="fas fa-thumbs-up"></i> ${note.likes || 0}</button>
+                                    <button class="dislike-btn"><i class="fas fa-thumbs-down"></i> ${note.dislikes || 0}</button>
                                     ${(note.username === currentUsername || isCreator) && !isLocked ? `
-                                        <button onclick="editNote('${note._id}')"><i class="fas fa-edit"></i> Edit</button>
-                                        <button onclick="deleteNote('${note._id}')"><i class="fas fa-trash"></i> Delete</button>
+                                        <button class="edit-btn"><i class="fas fa-edit"></i> Edit</button>
+                                        <button class="delete-btn"><i class="fas fa-trash"></i> Delete</button>
                                     ` : ''}
                                 </div>
                             </div>
                         `).join('')}
-                    </div>
+                   </div>
                 `;
+
+                // Add event listeners
+                document.querySelectorAll('.note').forEach(noteElement => {
+                    const noteId = noteElement.dataset.noteId;
+                    noteElement.querySelector('.like-btn')?.addEventListener('click', () => likeNote(noteId));
+                    noteElement.querySelector('.dislike-btn')?.addEventListener('click', () => dislikeNote(noteId));
+                    noteElement.querySelector('.edit-btn')?.addEventListener('click', () => editNote(noteId));
+                    noteElement.querySelector('.delete-btn')?.addEventListener('click', () => deleteNote(noteId));
+                });
             }
 
-            document.getElementById('add-note-btn').addEventListener('click', addNote);
+            document.getElementById('add-note-btn')?.addEventListener('click', addNote);
             updateUIBasedOnStatus();
         }
+
+        // Helper function to escape HTML special characters
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }  
         
         function formatNoteContent(content) {
             content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
