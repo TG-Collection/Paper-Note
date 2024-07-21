@@ -13,6 +13,15 @@ import psutil
 import time
 import socket
 import asyncio
+from sqlalchemy.exc import IntegrityError
+import time
+from ratelimit import rate_limit
+
+# Add this at the top of your file
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 start_time = time.time()
 
@@ -93,7 +102,9 @@ async def toggle_hide_space(short_code):
     
     return jsonify({'hidden': space.hidden}), 200
 
+
 @app.route('/api/create_public_space', methods=['POST'])
+@rate_limit(limit=1, per=60)  # Limit to 1 request per minute
 async def create_public_space():
     if 'username' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
@@ -103,18 +114,26 @@ async def create_public_space():
     
     short_code = generate_short_code()
     async with async_session() as sess:
-        while await sess.execute(select(PublicSpace).filter_by(short_code=short_code)):
-            short_code = generate_short_code()
-        
-        new_space = PublicSpace(
-            short_code=short_code,
-            creator=session['username'],
-            topic_name=topic_name
-        )
-        sess.add(new_space)
-        await sess.commit()
-    
-    return jsonify({'public_link': f'/go/{short_code}', 'space_id': new_space.id}), 201
+        async with sess.begin():
+            try:
+                while await sess.execute(select(PublicSpace).filter_by(short_code=short_code)):
+                    short_code = generate_short_code()
+                
+                new_space = PublicSpace(
+                    short_code=short_code,
+                    creator=session['username'],
+                    topic_name=topic_name
+                )
+                sess.add(new_space)
+                await sess.flush()  # This will assign an ID to new_space if it's auto-incrementing
+                
+                logger.info(f"Created new public space: {new_space.id} with short code: {short_code}")
+                
+                return jsonify({'public_link': f'/go/{short_code}', 'space_id': new_space.id}), 201
+            except IntegrityError:
+                logger.error(f"Failed to create public space due to integrity error. Topic: {topic_name}")
+                return jsonify({'error': 'Failed to create public space. Please try again.'}), 500
+            
 
 @app.route('/api/public_spaces', methods=['GET'])
 async def list_public_spaces():
