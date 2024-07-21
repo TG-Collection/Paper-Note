@@ -303,18 +303,20 @@ async def toggle_lock(short_code):
     
     return jsonify({'locked': space.locked}), 200
 
-@app.route('/api/public_spaces/<short_code>/notes')
+from sqlalchemy.orm import joinedload
+
+@app.route('/api/public_spaces/<short_code>/notes', methods=['GET'])
 async def get_public_space_notes(short_code):
     async with async_session() as sess:
-        space = await sess.execute(select(PublicSpace).filter_by(short_code=short_code))
-        space = space.scalar_one_or_none()
+        query = select(PublicSpace).options(joinedload(PublicSpace.notes)).filter_by(short_code=short_code)
+        result = await sess.execute(query)
+        space = result.unique().scalar_one_or_none()
+        
         if not space:
             return jsonify({'error': 'Space not found'}), 404
         
         if space.hidden and session.get('username') != space.creator:
             return jsonify({'error': 'Space is hidden'}), 403
-        
-        await sess.refresh(space, attribute_names=['notes'])
         
         notes = [{
             'id': note.id,
