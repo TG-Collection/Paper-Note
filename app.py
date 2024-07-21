@@ -154,25 +154,30 @@ async def generate_unique_short_code(session):
 
 @app.route('/api/public_spaces', methods=['GET'])
 async def list_public_spaces():
-    if 'username' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
+    try:
+        if 'username' not in session:
+            return jsonify({'error': 'Unauthorized'}), 401
+        
+        username = session['username']
+        
+        async with async_session() as sess:
+            result = await sess.execute(select(PublicSpace).filter_by(creator=username))
+            spaces = result.scalars().all()
+        
+        public_spaces = [{
+            'id': space.id,
+            'short_code': space.short_code,
+            'created_at': space.created_at.isoformat(),
+            'creator': space.creator,
+            'topic_name': space.topic_name,
+            'note_count': len(space.notes)
+        } for space in spaces]
+        
+        return jsonify(public_spaces), 200
+    except Exception as e:
+        logger.error(f"Error in list_public_spaces: {str(e)}")
+        return jsonify({'error': 'Internal Server Error'}), 500
     
-    username = session['username']
-    
-    async with async_session() as sess:
-        result = await sess.execute(select(PublicSpace).filter_by(creator=username))
-        spaces = result.scalars().all()
-    
-    public_spaces = [{
-        'id': space.id,
-        'short_code': space.short_code,
-        'created_at': space.created_at.isoformat(),
-        'creator': space.creator,
-        'topic_name': space.topic_name,
-        'note_count': len(space.notes)
-    } for space in spaces]
-    
-    return jsonify(public_spaces), 200
 
 @app.route('/api/public_spaces/<short_code>/edit_topic', methods=['PUT'])
 async def edit_topic_name(short_code):
