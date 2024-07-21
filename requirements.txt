@@ -4,3 +4,4 @@ pytz
 psutil
 sqlalchemy
 aiomysql
+cryptography
