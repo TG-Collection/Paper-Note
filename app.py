@@ -20,7 +20,7 @@ app = Quart(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "your_secret_key")  # Make sure to set this in production
 
 # MySQL connection
-DATABASE_URL = os.environ.get("DATABASE_URL", "mysql+aiomysql://user:password@localhost/floating_notes")
+DATABASE_URL = os.environ.get("DATABASE_URL")
 engine = create_async_engine(DATABASE_URL, echo=True)
 async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
