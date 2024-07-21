@@ -1,5 +1,5 @@
 from quart import Quart, request, jsonify, render_template, session, redirect, url_for, abort
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, ForeignKey, Text, func
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, ForeignKey, Text, func, UniqueConstraint
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from sqlalchemy.future import select
@@ -15,7 +15,6 @@ import socket
 import asyncio
 from sqlalchemy.exc import IntegrityError
 import time
-from ratelimit import rate_limit
 
 # Add this at the top of your file
 import logging
@@ -43,6 +42,7 @@ class User(Base):
 
 class PublicSpace(Base):
     __tablename__ = 'public_spaces'
+    __table_args__ = (UniqueConstraint('creator', 'created_at', name='uq_creator_created_at'),)
     id = Column(Integer, primary_key=True)
     short_code = Column(String(6), unique=True, nullable=False)
     creator = Column(String(50), ForeignKey('users.username'), nullable=False)
@@ -104,7 +104,6 @@ async def toggle_hide_space(short_code):
 
 
 @app.route('/api/create_public_space', methods=['POST'])
-@rate_limit(limit=1, per=60)  # Limit to 1 request per minute
 async def create_public_space():
     if 'username' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
@@ -112,12 +111,22 @@ async def create_public_space():
     data = await request.json
     topic_name = data.get('topic_name', 'No Name')
     
-    short_code = generate_short_code()
     async with async_session() as sess:
         async with sess.begin():
             try:
-                while await sess.execute(select(PublicSpace).filter_by(short_code=short_code)):
-                    short_code = generate_short_code()
+                # Check if the user has created a space in the last minute
+                one_minute_ago = datetime.utcnow() - timedelta(minutes=1)
+                recent_space = await sess.execute(
+                    select(PublicSpace)
+                    .filter(PublicSpace.creator == session['username'])
+                    .filter(PublicSpace.created_at > one_minute_ago)
+                )
+                if recent_space.scalars().first():
+                    logger.warning(f"User {session['username']} attempted to create multiple spaces within a minute")
+                    return jsonify({'error': 'Please wait a moment before creating another space'}), 429
+
+                # Generate a unique short code
+                short_code = await generate_unique_short_code(sess)
                 
                 new_space = PublicSpace(
                     short_code=short_code,
@@ -133,6 +142,14 @@ async def create_public_space():
             except IntegrityError:
                 logger.error(f"Failed to create public space due to integrity error. Topic: {topic_name}")
                 return jsonify({'error': 'Failed to create public space. Please try again.'}), 500
+            
+
+async def generate_unique_short_code(session):
+    while True:
+        short_code = generate_short_code()
+        existing = await session.execute(select(PublicSpace).filter_by(short_code=short_code))
+        if not existing.scalars().first():
+            return short_code
             
 
 @app.route('/api/public_spaces', methods=['GET'])
