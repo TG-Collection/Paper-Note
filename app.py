@@ -1,7 +1,7 @@
 from quart import Quart, request, jsonify, render_template, session, redirect, url_for, abort
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, ForeignKey, Text, func, UniqueConstraint
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker, selectinload
 from sqlalchemy.future import select
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
@@ -161,22 +161,29 @@ async def list_public_spaces():
         username = session['username']
         
         async with async_session() as sess:
-            result = await sess.execute(select(PublicSpace).filter_by(creator=username))
+            # Use selectinload to eagerly load the notes relationship
+            result = await sess.execute(
+                select(PublicSpace)
+                .options(selectinload(PublicSpace.notes))
+                .filter_by(creator=username)
+            )
             spaces = result.scalars().all()
-        
-        public_spaces = [{
-            'id': space.id,
-            'short_code': space.short_code,
-            'created_at': space.created_at.isoformat(),
-            'creator': space.creator,
-            'topic_name': space.topic_name,
-            'note_count': len(space.notes)
-        } for space in spaces]
+            
+            # Perform all data operations within the session
+            public_spaces = [{
+                'id': space.id,
+                'short_code': space.short_code,
+                'created_at': space.created_at.isoformat(),
+                'creator': space.creator,
+                'topic_name': space.topic_name,
+                'note_count': len(space.notes)
+            } for space in spaces]
         
         return jsonify(public_spaces), 200
     except Exception as e:
         logger.error(f"Error in list_public_spaces: {str(e)}")
         return jsonify({'error': 'Internal Server Error'}), 500
+    
     
 
 @app.route('/api/public_spaces/<short_code>/edit_topic', methods=['PUT'])
